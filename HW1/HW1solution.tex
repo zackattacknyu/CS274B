@@ -71,6 +71,13 @@ This ends up being the following:
 \[
 exp(-A(\theta)) + exp(-A(\theta)) + exp(\theta_x - A(\theta)) + exp(\theta_x + \theta_{xy} - A(\theta)) = 1
 \]
-
+After doing some factoring
+\[
+\frac{exp(\theta_x) + exp(\theta_{xy} + \theta_x) + 2}{exp(A(\theta))} = 1
+\]
+After cross multiplying and solving for $A(\theta)$
+\[
+A(\theta) = log( exp(\theta_x) + exp(\theta_{xy} + \theta_x) + 2 )
+\]
 
 \end{document}
