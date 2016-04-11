@@ -60,18 +60,27 @@
 
 \section*{Problem 1: }
 
-I will assume that each random variable had $d$ states.
+I will assume that each random variable can take on $d$ values.
 
 \subsection*{Part A}
 
-To satisfy W, we need $d^3$ parameters \\
-To satisfy Z, we need $d^2$ parameters \\
-To satisfy Y, we need $d$ parameters\\
-For probabilities of X, we need $d-1$ parameters\\
+To satisfy $p(W|X,Y,Z)$, we need $d-1$ parameters for values of $W$ and each of those values are conditioned on $d^3$ possible configurations of $X,Y,Z$, thus we need $d^3(d-1)$ parameters.\\
+\\
+To satisfy $p(Z|X,Y)$, we need $d^2(d-1)$ parameters because we have $d-1$ parameter values each conditioned on $d^2$ configurations. \\
+\\
+To satisfy $p(Y|X)$, we need $d(d-1)$ parameters because we have $d-1$ parameter values each conditioned on $d$ configurations.\\
+\\
+To satisfy $p(X)$, we need $d-1$ parameters because we have $d-1$ parameter values.\\
+\\
 Our total is thus
 \[
-\frac{d^4-1}{d-1} + d - 2
+\frac{d^4-1}{d-1}(d-1)
 \]
+Simplifying, our final total is
+\[
+d^4-1
+\]
+Thus this Bayesian network does not simplify the joint distribution
 
 \subsection*{Part B}
 
@@ -81,10 +90,11 @@ Thus our total is just $4(d-1)$
 
 \subsection*{Part C}
 
-The variables $Z,W,X$ each need $d$ parameters\\
-The variable $Y$ needs $d-1$ parameters\\
+The variables $p(Z|Y)$, $p(W|Y)$, $p(X|Y)$ each need $d(d-1)$ parameters since we have $d-1$ parameter values conditioned on $d$ configurations.\\
 \\
-Thus our total is $4d-1$
+The factor $p(Y)$ needs $d-1$ parameters\\
+\\
+Thus our total is $(3d+1)(d-1)$
 
 \subsection*{Part D}
 
