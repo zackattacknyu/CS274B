@@ -110,19 +110,28 @@ Our total is $4d-1$
 \subsection*{Part A}
 No\\
 Knowing the value of $\textit{projector\_plugged\_in}$ will affect the value of $\textit{power\_in\_wire}$ and subsequent variables in the network, none of which are $\textit{Sam\_reading\_book}$\\
-The value of $\textit{Sam\_reading\_book}$ is conditioned on different variables than $\textit{projector\_plugged\_in}$
+Further, the value of $\textit{Sam\_reading\_book}$ is conditioned on the value of $\textit{room\_light\_on}$\\
+The variables $\textit{room\_light\_on}$ and $\textit{power\_in\_wire}$ are conditionally independent given $\textit{power\_in\_building}$
 
 \subsection*{Part B}
 
-Yes\\
-Knowing that $\textit{screen\_lit\_up}$ is true means that you know more about whether or not $\textit{power\_in\_building}$ is true. \\
-Belief in $\textit{Sam\_reading\_book}$ is affected by the value of $\textit{power\_in\_building}$
+No\\
+Knowing that $\textit{screen\_lit\_up}$ is true means that the probability of $\textit{ray\_says\_screen\_is\_dark}$ is affected but no other variable ended up affected.
 
 \subsection*{Part C}
 
+No\\
+Knowledge of $\textit{screen\_lit\_up}$ and $\textit{projector\_plugged\_in}$ affect subsequent variables in the network none of which are $\textit{Sam\_reading\_book}$
+
 \subsection*{Part D}
 
+If $\textit{lamp\_works}$ was observed, then we would update the probabilities for $\textit{projector\_lamp\_on}$\\
+We would then have to update the probabilities for $\textit{screen\_lit\_up}$\\
+This would cause us to update probabilities for $\textit{ray\_says\_screen\_is\_dark}$
+
 \subsection*{Part E}
+
+If we observe just $\textit{power\_in\_projector}$ then the same variables from Part D will have their probabilities changed.
 
 \section*{Problem 3: }
 
@@ -154,7 +163,11 @@ After some factoring
 \[
 A(\theta) = log( exp(\theta_x)(1 + exp(1) ) + 2 )
 \]
-INSERT GRAPH OF THIS
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in]{prob3bplot.png}
+\caption{Plot for $A(\theta)$. It appears convex as expected}
+\end{figure}
 
 \subsection*{Part C}
 This is the partial with respect to $\theta_x$
