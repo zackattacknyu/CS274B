@@ -44,12 +44,51 @@ for i in range(mSeq):
     for j in range(1,len(curSeq)):
         xPrev = curSeq[j-1]
         xCurrent = curSeq[j]
-        Tmatrix[xPrev,xCurrent] += 1
-        numEx+=1
-Tmatrix = np.divide(Tmatrix,numEx)
+        Tmatrix[xCurrent,xPrev] += 1
+Tsum = np.matrix(np.sum(Tmatrix,1))
+Tsum = np.transpose(Tsum)
+TsumTiled = np.tile(Tsum,(1,8))
+Tmatrix = np.divide(Tmatrix,TsumTiled)
+print np.sum(Tmatrix,1) #should be column of all ones
+
+
 print
 print 'Transition Matrix (first 5 states) is as follows:'
 print Tmatrix[0:4,0:4]
+
+#toy example
+toyT = np.matrix([[0.2,0.3,0.5],[0.4,0.2,0.4],[0.3,0.6,0.1]])
+toyX0 = np.matrix([0.1,0.2,0.7])
+toyX1 = toyX0*toyT
+print
+print 'Toy Output:'
+print toyX1
+print np.sum(toyX1)
+
+#Part B, getting the stationary distribution
+Tmatrix2 = np.matrix(Tmatrix)
+x0array = np.matrix(p0vals)
+x1array = x0array*Tmatrix2
+print
+#print Tmatrix2.shape
+#print x0array.shape
+#print x1array
+#print np.sum(x1array)
+
+epsilon = 1e-8 #whether or not we have stable
+curX = x1array
+for i in range(500):
+    prevX = np.copy(curX)
+    curX = curX*Tmatrix2
+    diffX = np.abs(np.subtract(prevX,curX))
+    if np.sum(diffX)<epsilon:
+        print 'Stable State at:' + str(i)
+        break
+print 'Stationary Distribution:'
+print curX
+#print np.sum(curX)
+
+
 
 
 # function markovMarginals(x,o,p0,Tr,Ob):
