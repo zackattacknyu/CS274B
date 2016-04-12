@@ -1,12 +1,14 @@
 import numpy as np
 from os import walk
+
+
 mypath = 'proteins/'  # use path to data files
 _, _, filenames = next(walk(mypath), (None, None, []))
 
 mSeq = len(filenames)        # read in each sequence
 o,x = [],[]
 for i in range(mSeq):
-    f = open( filenames[i] , 'r')
+    f = open( mypath + filenames[i] , 'r')
     o.append( f.readline()[:-1] )  # strip trailing '\n'
     x.append( f.readline()[:-1] )
     f.close()
@@ -23,6 +25,31 @@ for i in range(mSeq):       # and convert to numeric indices
     x[i] = np.array([xvals.index(s) for s in x[i]])
     o[i] = np.array([ovals.index(s) for s in o[i]])
 
+#Part A Code
+p0vals = np.zeros(len(xvals))
+for i in range(mSeq):
+    curSeq = x[i]
+    x0val = curSeq[0]
+    p0vals[x0val] += 1
+p0vals = np.divide(p0vals,mSeq)
+print 'p(x_0) is as follows:'
+print p0vals
+
+
+#Part B Code
+Tmatrix = np.zeros((len(xvals),len(xvals)))
+numEx = 0
+for i in range(mSeq):
+    curSeq = x[i]
+    for j in range(1,len(curSeq)):
+        xPrev = curSeq[j-1]
+        xCurrent = curSeq[j]
+        Tmatrix[xPrev,xCurrent] += 1
+        numEx+=1
+Tmatrix = np.divide(Tmatrix,numEx)
+print
+print 'Transition Matrix (first 5 states) is as follows:'
+print Tmatrix[0:4,0:4]
 
 
 # function markovMarginals(x,o,p0,Tr,Ob):
