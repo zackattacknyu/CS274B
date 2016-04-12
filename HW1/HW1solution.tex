@@ -98,22 +98,32 @@ Thus our total is $(3d+1)(d-1)$
 
 \subsection*{Part D}
 
-To satisfy Z, we need $d^2$ parameters\\
-For X and Y, we need $d-1$ parameters for each one\\
-To satisfy W, we need $d$ parameters\\
-Our total is thus $d^2 + 2d - 1$
+To satisfy $p(X)$ and $p(Y)$ we need $d-1$ parameters for each of them\\
+\\
+To satisfy $p(W|X)$ we need $d(d-1)$ parameters since there are $d-1$ parameter values conditioned on $d$ configurations. \\
+To satisfy $p(Z|X,Y)$ we need $d^2(d-1)$ parameters since there are $d-1$ parameter values conditioned on $d^2$ configurations.\\
+\\
+Our total is thus
+\[
+(d^2+d+2)(d-1) = (d^2+d+1)(d-1) + (d-1) = (d^3-1) + (d-1) = d^3 + d - 2
+\]
 
 \subsection*{Part E}
 
-To satisfy W,Y,Z, we need $d$ parameters\\
-To satisfy Z, we need $d-1$ parameters\\
-Our total is $4d-1$ 
+To satisfy $p(Z)$ we need $d-1$ parameters\\
+\\
+To satisfy $p(Y|Z)$ we need $d(d-1)$ parameters as there are $d-1$ values conditioned on $d$ configurations. \\
+To satisfy $p(X|Y)$ we need $d(d-1)$ parameters for same reason as $p(Y|Z)$\\
+\\
+To satisfy $p(W|X)$ we need $d(d-1)$ parameters for same reason as $p(Y|Z)$\\
+\\
+Our total is thus $(3d+1)(d-1)$ parameters
 
 \subsection*{Part F}
 
-To satisfy W,Y,Z, we need $d$ parameters\\
-To satisfy Z, we need $d-1$ parameters\\
-Our total is $4d-1$ 
+To satisfy $p(X)$ we need $d-1$ parameters\\
+To satisfy the other three factors, we need $d(d-1)$ parameters for each of them for the same reason as $p(Y|Z)$ in part E\\
+Our total is thus $(3d+1)(d-1)$ parameters
 
 \section*{Problem 2:}
 
