@@ -167,30 +167,37 @@ Our total is thus $(3d+1)(d-1)$ parameters
 \section*{Problem 2:}
 
 \subsection*{Part A}
-No\\
-Knowing the value of $\textit{projector\_plugged\_in}$ will affect the value of $\textit{power\_in\_wire}$ and subsequent variables in the network, none of which are $\textit{Sam\_reading\_book}$\\
-Further, the value of $\textit{Sam\_reading\_book}$ is conditioned on the value of $\textit{room\_light\_on}$\\
-The variables $\textit{room\_light\_on}$ and $\textit{power\_in\_wire}$ are conditionally independent given $\textit{power\_in\_building}$
+Yes\\
+Knowing $\textit{projector\_plugged\_in}$ lets you update probabilities for $\textit{power\_in\_wire}$.\\
+This in turns means you can infer new probabilities for $\textit{power\_in\_building}$\\
+These new probabilities mean you now have new values for  $\textit{room\_light\_on}$\\
+This will in turn mean new probabilities for $\textit{Sam\_reading\_book}$
 
 \subsection*{Part B}
 
-No\\
-Knowing that $\textit{screen\_lit\_up}$ is true means that the probability of $\textit{ray\_says\_screen\_is\_dark}$ is affected but no other variable ended up affected.
+Yes\\
+This allows you to infer new values for $\textit{power\_in\_building}$\\
+This will in turn mean new probabilities for $\textit{Sam\_reading\_book}$\\
 
 \subsection*{Part C}
 
-No\\
-Knowledge of $\textit{screen\_lit\_up}$ and $\textit{projector\_plugged\_in}$ affect subsequent variables in the network none of which are $\textit{Sam\_reading\_book}$
+Yes\\
+**ADD EXPLANATION**
 
 \subsection*{Part D}
 
 If $\textit{lamp\_works}$ was observed, then we would update the probabilities for $\textit{projector\_lamp\_on}$\\
 We would then have to update the probabilities for $\textit{screen\_lit\_up}$\\
-This would cause us to update probabilities for $\textit{ray\_says\_screen\_is\_dark}$
+This would cause us to update probabilities for $\textit{ray\_says\_screen\_is\_dark}$\\
+**VERIFY THIS**
 
 \subsection*{Part E}
 
-If we observe just $\textit{power\_in\_projector}$ then the same variables from Part D will have their probabilities changed.
+If we observe just $\textit{power\_in\_projector}$ then the same variables from Part D will have their probabilities changed.\\
+We would also have to update $\textit{power\_in\_building}$ and $\textit{power\_in\_wire}$\\
+**VERIFY THIS**
+
+\newpage
 
 \section*{Problem 3: }
 
