@@ -93,9 +93,25 @@ for i in range(500):
         print 'Stable State at: ' + str(i)
         break
 print 'Stationary Distribution:'
-print curX
+print np.transpose(np.matrix(curX))
 #print np.sum(curX)
 
+#Part C Code
+Omatrix = np.zeros((len(xvals),len(ovals)))
+for i in range(mSeq):
+    curSeq = x[i]
+    curObs = o[i]
+    for j in range(len(curSeq)):
+        xt = curSeq[j]
+        ot = curObs[j]
+        Omatrix[xt,ot] += 1
+Osum = np.matrix(np.sum(Omatrix,0))
+OsumTiled = np.tile(Osum,(8,1))
+Omatrix = np.divide(Omatrix,OsumTiled)
+#print np.sum(Omatrix,0) #shows each column sums to 1
+print
+print 'Emission Probability Matrix (first 5 states) is as follows:'
+print Omatrix[0:4,0:4]
 
 
 
