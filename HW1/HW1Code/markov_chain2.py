@@ -55,7 +55,7 @@ Tmatrix = np.divide(Tmatrix,TsumTiled)
 
 print
 print 'Transition Matrix (first 5 states) is as follows:'
-print Tmatrix[0:4,0:4]
+print Tmatrix[0:5,0:5]
 
 epsilon = 1e-8 #whether or not we have stability
 
