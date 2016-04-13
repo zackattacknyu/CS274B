@@ -252,4 +252,35 @@ Approximately
 \bigtriangledown A(\theta) = [0.91937,0.80978]
 \]
 This is also the expected value of the distribution if $\theta=[1,2]$
+
+\newpage
+
+\section*{Problem 4}
+
+\subsection*{Part A}
+
+Here is the code to compute Part A (it runs after the code from markov\_chain.py)
+\begin{lstlisting}
+p0vals = np.zeros(len(xvals))
+for i in range(mSeq):
+    curSeq = x[i]
+    x0val = curSeq[0]
+    p0vals[x0val] += 1
+p0vals = np.divide(p0vals,mSeq)
+print np.transpose(np.matrix(p0vals))
+\end{lstlisting}
+This is the result of the print statement
+\begin{lstlisting}
+[[ 0.87656353]
+ [ 0.        ]
+ [ 0.        ]
+ [ 0.        ]
+ [ 0.03587887]
+ [ 0.        ]
+ [ 0.0875576 ]
+ [ 0.        ]]
+\end{lstlisting}
+
+\subsection*{Part B}
+
 \end{document}
