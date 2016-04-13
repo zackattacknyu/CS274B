@@ -36,6 +36,7 @@ p0vals = np.divide(p0vals,mSeq)
 print 'p(x_0) is as follows:'
 print np.transpose(np.matrix(p0vals))
 
+print
 
 #Part B Code
 Tmatrix = np.zeros((len(xvals),len(xvals)))
@@ -47,19 +48,23 @@ for i in range(mSeq):
         Tmatrix[xPrev,xCurrent] += 1
 Tsum = np.matrix(np.sum(Tmatrix,axis=1))
 Tsum = np.transpose(Tsum)
-#TsumTiled = np.tile(Tsum,(1,8))
-#print Tsum.shape
 TsumTiled = np.matlib.repmat(Tsum,1,8)
 Tmatrix = np.divide(Tmatrix,TsumTiled)
-#print
-#print np.sum(Tmatrix,1) #should be column of all ones
-
-
-print
 print 'Transition Matrix (first 5 states) is as follows:'
 print Tmatrix[0:5,0:5]
 
-epsilon = 1e-8 #whether or not we have stability
+epsilon = 1e-8
+Tmatrix2 = np.matrix(Tmatrix)
+curX = np.matrix(p0vals)
+for i in range(500):
+    prevX = np.copy(curX)
+    curX = curX*Tmatrix2
+    diffX = np.abs(np.subtract(prevX,curX))
+    if np.sum(diffX)<epsilon:
+        break
+print
+print 'Stationary Distribution:'
+print np.transpose(np.matrix(curX))
 
 #toy example
 toyT = np.matrix([[0.2,0.3,0.5],[0.4,0.2,0.4],[0.3,0.6,0.1]])
@@ -75,28 +80,6 @@ for i in range(500):
         print curToyX
         break
 #print np.sum(curToyX)
-
-#Part B, getting the stationary distribution
-Tmatrix2 = np.matrix(Tmatrix)
-x0array = np.matrix(p0vals)
-x1array = x0array*Tmatrix2
-print
-#print Tmatrix2.shape
-#print x0array.shape
-#print x1array
-#print np.sum(x1array)
-
-curX = x1array
-for i in range(500):
-    prevX = np.copy(curX)
-    curX = curX*Tmatrix2
-    diffX = np.abs(np.subtract(prevX,curX))
-    if np.sum(diffX)<epsilon:
-        print 'Stable State at: ' + str(i)
-        break
-print 'Stationary Distribution:'
-print np.transpose(np.matrix(curX))
-#print np.sum(curX)
 
 #Part C Code
 Omatrix = np.zeros((len(xvals),len(ovals)))
