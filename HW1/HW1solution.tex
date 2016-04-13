@@ -167,11 +167,9 @@ Our total is thus $(3d+1)(d-1)$ parameters
 \section*{Problem 2:}
 
 \subsection*{Part A}
-Yes\\
-Knowing $\textit{projector\_plugged\_in}$ lets you update probabilities for $\textit{power\_in\_wire}$.\\
-This in turns means you can infer new probabilities for $\textit{power\_in\_building}$\\
-These new probabilities mean you now have new values for  $\textit{room\_light\_on}$\\
-This will in turn mean new probabilities for $\textit{Sam\_reading\_book}$
+No\\
+There is a "vee" structure between them and the variables are unobserved\\
+Thus all paths are inactive and they are conditionally independent\\
 
 \subsection*{Part B}
 
@@ -182,14 +180,14 @@ This will in turn mean new probabilities for $\textit{Sam\_reading\_book}$\\
 \subsection*{Part C}
 
 Yes\\
-**ADD EXPLANATION**
+Observing a value for $\textit{screen\_lit\_up}$ lets you infer information about the probability of $\textit{power\_in\_wire}$. \\
+Knowledge of $\textit{projector\_plugged\_in}$ combined with the information about $\textit{power\_in\_wire}$ will affect $\textit{power\_in\_building}$. This will in turn affect  $\textit{Sam\_reading\_book}$ because it is connected through a chain to $\textit{power\_in\_building}$.
 
 \subsection*{Part D}
 
 If $\textit{lamp\_works}$ was observed, then we would update the probabilities for $\textit{projector\_lamp\_on}$\\
 We would then have to update the probabilities for $\textit{screen\_lit\_up}$\\
 This would cause us to update probabilities for $\textit{ray\_says\_screen\_is\_dark}$\\
-**VERIFY THIS**
 
 \subsection*{Part E}
 
