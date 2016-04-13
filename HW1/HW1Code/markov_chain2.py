@@ -45,7 +45,7 @@ for i in range(mSeq):
         xPrev = curSeq[j-1]
         xCurrent = curSeq[j]
         Tmatrix[xPrev,xCurrent] += 1
-Tsum = np.matrix(np.sum(Tmatrix,0))
+Tsum = np.matrix(np.sum(Tmatrix,axis=1))
 Tsum = np.transpose(Tsum)
 #TsumTiled = np.tile(Tsum,(1,8))
 #print Tsum.shape
