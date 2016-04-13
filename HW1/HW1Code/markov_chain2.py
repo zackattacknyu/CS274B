@@ -1,5 +1,6 @@
 import numpy as np
 from os import walk
+import numpy.matlib
 
 
 mypath = 'proteins/'  # use path to data files
@@ -38,16 +39,17 @@ print np.transpose(np.matrix(p0vals))
 
 #Part B Code
 Tmatrix = np.zeros((len(xvals),len(xvals)))
-numEx = 0
 for i in range(mSeq):
     curSeq = x[i]
     for j in range(1,len(curSeq)):
         xPrev = curSeq[j-1]
         xCurrent = curSeq[j]
-        Tmatrix[xCurrent,xPrev] += 1
-Tsum = np.matrix(np.sum(Tmatrix,1))
+        Tmatrix[xPrev,xCurrent] += 1
+Tsum = np.matrix(np.sum(Tmatrix,0))
 Tsum = np.transpose(Tsum)
-TsumTiled = np.tile(Tsum,(1,8))
+#TsumTiled = np.tile(Tsum,(1,8))
+#print Tsum.shape
+TsumTiled = np.matlib.repmat(Tsum,1,8)
 Tmatrix = np.divide(Tmatrix,TsumTiled)
 #print
 #print np.sum(Tmatrix,1) #should be column of all ones
