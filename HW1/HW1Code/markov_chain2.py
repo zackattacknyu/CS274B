@@ -107,13 +107,15 @@ for i in range(mSeq):
         xt = curSeq[j]
         ot = curObs[j]
         Omatrix[xt,ot] += 1
-Osum = np.matrix(np.sum(Omatrix,0))
-OsumTiled = np.tile(Osum,(8,1))
+Osum = np.matrix(np.sum(Omatrix,axis=1))
+Osum = np.transpose(Osum);
+OsumTiled = np.matlib.repmat(Osum,1,20)
+#OsumTiled = np.tile(Osum,(8,1))
 Omatrix = np.divide(Omatrix,OsumTiled)
 #print np.sum(Omatrix,0) #shows each column sums to 1
 print
 print 'Emission Probability Matrix (first 5 states) is as follows:'
-print Omatrix[0:4,0:4]
+print Omatrix[0:5,0:5]
 
 
 
