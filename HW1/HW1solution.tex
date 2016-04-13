@@ -338,4 +338,36 @@ Stationary Distribution:
  [  3.17181525e-04]]
 \end{lstlisting}
 
+\subsection*{Part C}
+
+Here is the code for it (follows part B code)
+
+\begin{lstlisting}
+Omatrix = np.zeros((len(xvals),len(ovals)))
+for i in range(mSeq):
+    curSeq = x[i]
+    curObs = o[i]
+    for j in range(len(curSeq)):
+        xt = curSeq[j]
+        ot = curObs[j]
+        Omatrix[xt,ot] += 1
+Osum = np.matrix(np.sum(Omatrix,axis=1))
+Osum = np.transpose(Osum);
+OsumTiled = np.matlib.repmat(Osum,1,20)
+Omatrix = np.divide(Omatrix,OsumTiled)
+print
+print 'Emission Probability Matrix (first 5 states) is as follows:'
+print Omatrix[0:5,0:5]
+\end{lstlisting}
+
+This is the output of the print statements
+\begin{lstlisting}
+Emission Probability Matrix (first 5 states) is as follows:
+[[ 0.05946997  0.01452542  0.06708915  0.04987037  0.03195305]
+ [ 0.05294974  0.02418001  0.04701668  0.03918057  0.05093474]
+ [ 0.06182642  0.01925435  0.03359294  0.0473769   0.05593569]
+ [ 0.09200121  0.01224888  0.07588249  0.09230407  0.03970791]
+ [ 0.11633794  0.01160627  0.04784776  0.08957451  0.0400521 ]]
+\end{lstlisting}
+
 \end{document}

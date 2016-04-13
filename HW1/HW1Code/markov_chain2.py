@@ -93,9 +93,7 @@ for i in range(mSeq):
 Osum = np.matrix(np.sum(Omatrix,axis=1))
 Osum = np.transpose(Osum);
 OsumTiled = np.matlib.repmat(Osum,1,20)
-#OsumTiled = np.tile(Osum,(8,1))
 Omatrix = np.divide(Omatrix,OsumTiled)
-#print np.sum(Omatrix,0) #shows each column sums to 1
 print
 print 'Emission Probability Matrix (first 5 states) is as follows:'
 print Omatrix[0:5,0:5]
