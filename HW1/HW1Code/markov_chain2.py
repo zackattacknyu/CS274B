@@ -85,6 +85,7 @@ for i in range(500):
 
 #Part C Code
 Omatrix = np.zeros((len(xvals),len(ovals)))
+Omatrix2 = np.zeros((len(ovals),len(xvals)))
 for i in range(mSeq):
     curSeq = x[i]
     curObs = o[i]
@@ -92,6 +93,7 @@ for i in range(mSeq):
         xt = curSeq[j]
         ot = curObs[j]
         Omatrix[xt,ot] += 1
+        Omatrix2[ot,xt] += 1
 Osum = np.matrix(np.sum(Omatrix,axis=1))
 Osum = np.transpose(Osum);
 OsumTiled = np.matlib.repmat(Osum,1,20)
@@ -100,19 +102,60 @@ print
 print 'Emission Probability Matrix (first 5 states) is as follows:'
 print Omatrix[0:5,0:5]
 
-Ob = np.copy(Omatrix);
+Osum2 = np.matrix(np.sum(Omatrix2,axis=1))
+Osum2 = np.transpose(Osum2);
+OsumTiled2 = np.matlib.repmat(Osum2,1,8)
+Omatrix2 = np.divide(Omatrix2,OsumTiled2)
+#print np.matrix(np.sum(Omatrix2,axis=1))
+#print 'Ob matrix (first 5 states) is as follows:'
+#print Omatrix2[0:5,0:5]
+
+p0 = np.zeros(len(ovals))
+for i in range(mSeq):
+    curSeq = o[i]
+    x0val = curSeq[0]
+    p0[x0val] += 1
+p0 = np.matrix(np.divide(p0, mSeq))
+p0 = np.transpose(p0)
+
+Ob = np.matrix(np.copy(Omatrix))
 dx,do2 = Ob.shape   # if a numpy matrix
-L = len(o)
+curT = 4
+curObs = o[curT]
+L = len(curObs)
 f = np.zeros((L,dx))
 r = np.zeros((L,dx))
 p = np.zeros((L,dx))
 
-print 'New Vars:'
+print 'Shapes:'
+print Ob.shape
+print p0.shape
+#initF = p0*Ob
+#print initF
 print dx
-print do2
-initF = np.matrix(np.sum(Ob,axis=1))
-print initF
-#f[0,:] = ...   # compute initial forward message
+compF = Ob[:,curObs[0]]
+print compF
+f[0,:] = np.reshape(compF[:,0],8)   # compute initial forward message
+log_pO = np.log(p0)  # update probability of sequence so far
+f[0,:] /= f[0,:].sum()  # normalize (to match definition of f)
+print f[0,:]
+#print log_pO
+
+print Tmatrix.shape
+
+curF = np.reshape(f[0,:],(1,8))
+curXprobs = np.transpose(curF*Tmatrix)
+curObcol = Ob[:,curObs[1]]
+print curXprobs.shape
+print curObcol.shape
+f[1,:] = np.reshape(np.multiply(curXprobs,curObcol),8)
+f[1,:] /= f[1,:].sum()  # normalize (to match definition of f)
+print f[1,:]
+
+#for t in range(1,L):    # compute forward messages
+#    f[t,:] = ...
+#    log_pO += ...
+#    f[t,:] /= f[t,:].sum()
 
 
 
