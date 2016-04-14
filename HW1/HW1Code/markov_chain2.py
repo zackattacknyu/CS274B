@@ -185,7 +185,7 @@ def markovMarginals(x,o,p0,Tr,Ob):
     r = np.zeros((L,dx))
     p = np.zeros((L,dx))
 
-    p0 = np.reshape(p0vals, (dx, 1))
+    p0 = np.reshape(p0, (dx, 1))
     compF = np.multiply(Ob[:, o[0]], p0)
     f[0, :] = np.reshape(compF, dx)  # compute initial forward message
     log_pO = np.log(f[0,:].sum())   # update probability of sequence so far
