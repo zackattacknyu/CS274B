@@ -233,3 +233,18 @@ curObs = o[fileNum]
 print
 print 'logp for sequence 4:'
 print logp
+
+#toy example
+toyT = np.matrix([[0.2,0.3,0.5],[0.4,0.2,0.4],[0.3,0.6,0.1]])
+toyOmat = np.matrix([[0.8,0.1,0.1],[0.1,0.4,0.5],[0.7,0.2,0.1]])
+toyP0 = np.matrix([0.1,0.2,0.7])
+toyObs = np.array([1, 2, 0, 1, 1, 0, 2])
+
+[toyLog,toyPmatrix] = markovMarginals(x,toyObs,toyP0,toyT,toyOmat)
+
+print
+print 'Toy Log P:'
+print toyLog
+print
+print 'Toy P Matrix:'
+print toyPmatrix
