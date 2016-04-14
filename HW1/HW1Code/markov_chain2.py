@@ -120,7 +120,7 @@ p0 = np.transpose(p0)
 
 Ob = np.matrix(np.copy(Omatrix))
 dx,do2 = Ob.shape   # if a numpy matrix
-curT = 4
+curT = 0
 curObs = o[curT]
 L = len(curObs)
 f = np.zeros((L,dx))
@@ -128,8 +128,9 @@ r = np.zeros((L,dx))
 p = np.zeros((L,dx))
 
 
-compF = Ob[:,curObs[0]]
-f[0,:] = np.reshape(compF[:,0],8)   # compute initial forward message
+p0col = np.reshape(p0vals,(8,1))
+compF = np.multiply(Ob[:,curObs[0]],p0col)
+f[0,:] = np.reshape(compF,8)   # compute initial forward message
 log_pO = np.log(f[0,:].sum())  # update probability of sequence so far
 f[0,:] /= f[0,:].sum()  # normalize (to match definition of f)
 
@@ -144,10 +145,10 @@ f[0,:] /= f[0,:].sum()  # normalize (to match definition of f)
 # print f[1,:]
 
 for t in range(1,L):    # compute forward messages
-    prevF = np.reshape(f[t-1,:], (1,8))
+    prevF = np.reshape(f[t-1,:], (1,dx))
     curXprobs = np.transpose(prevF * Tmatrix)
     curObcol = Ob[:, curObs[t]]
-    f[t,:] = np.reshape(np.multiply(curXprobs, curObcol), 8)
+    f[t,:] = np.reshape(np.multiply(curXprobs, curObcol), dx)
     log_pO += np.log(f[t,:].sum())
     f[t,:] /= f[t,:].sum()  # normalize (to match definition of f)
 
@@ -157,6 +158,30 @@ print f[0:5,:]
 print
 print 'Log Likelihood:'
 print log_pO
+
+r[L-1,:] = 1.0  # initialize reverse messages
+p[L-1,:] = np.multiply(r[L-1,:],f[L-1,:])  # and marginals
+print p[L-1,:]
+p[L-1,:] /= p[L-1,:].sum()
+
+for t in range(L-2,-1,-1):
+    prevR = np.reshape(r[t+1,:],(dx,1))
+    curObcol = Ob[:, curObs[t+1]]
+    curCol = np.matrix(np.multiply(prevR,curObcol))
+    r[t,:] = np.reshape(Tmatrix*curCol, dx)
+    r[t,:] /= r[t,:].sum()
+    p[t,:] = np.multiply(r[t,:],f[t,:])
+    p[t,:] /= p[t,:].sum()
+
+print 'time 6 reverse messages:',r[6,:]
+print 'time 6 forward messages:', f[6,:]
+
+print 'time 6 marginal probs'
+print p[6,:]
+
+print 'First 5 Files:'
+for i in range(0,5):
+    print filenames[i]
 
 # function markovMarginals(x,o,p0,Tr,Ob):
 #     '''Compute p(o) and the marginal probabilities p(x_t|o) for a Markov model
