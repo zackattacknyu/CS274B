@@ -127,37 +127,36 @@ f = np.zeros((L,dx))
 r = np.zeros((L,dx))
 p = np.zeros((L,dx))
 
-print 'Shapes:'
-print Ob.shape
-print p0.shape
-#initF = p0*Ob
-#print initF
-print dx
+
 compF = Ob[:,curObs[0]]
-print compF
 f[0,:] = np.reshape(compF[:,0],8)   # compute initial forward message
-log_pO = np.log(p0)  # update probability of sequence so far
+log_pO = np.log(f[0,:].sum())  # update probability of sequence so far
 f[0,:] /= f[0,:].sum()  # normalize (to match definition of f)
-print f[0,:]
-#print log_pO
 
-print Tmatrix.shape
+#
+# curF = np.reshape(f[0,:],(1,8))
+# curXprobs = np.transpose(curF*Tmatrix)
+# curObcol = Ob[:,curObs[1]]
+# print curXprobs.shape
+# print curObcol.shape
+# f[1,:] = np.reshape(np.multiply(curXprobs,curObcol),8)
+# f[1,:] /= f[1,:].sum()  # normalize (to match definition of f)
+# print f[1,:]
 
-curF = np.reshape(f[0,:],(1,8))
-curXprobs = np.transpose(curF*Tmatrix)
-curObcol = Ob[:,curObs[1]]
-print curXprobs.shape
-print curObcol.shape
-f[1,:] = np.reshape(np.multiply(curXprobs,curObcol),8)
-f[1,:] /= f[1,:].sum()  # normalize (to match definition of f)
-print f[1,:]
+for t in range(1,L):    # compute forward messages
+    prevF = np.reshape(f[t-1,:], (1,8))
+    curXprobs = np.transpose(prevF * Tmatrix)
+    curObcol = Ob[:, curObs[t]]
+    f[t,:] = np.reshape(np.multiply(curXprobs, curObcol), 8)
+    log_pO += np.log(f[t,:].sum())
+    f[t,:] /= f[t,:].sum()  # normalize (to match definition of f)
 
-#for t in range(1,L):    # compute forward messages
-#    f[t,:] = ...
-#    log_pO += ...
-#    f[t,:] /= f[t,:].sum()
-
-
+print
+print 'First 5 F rows'
+print f[0:5,:]
+print
+print 'Log Likelihood:'
+print log_pO
 
 # function markovMarginals(x,o,p0,Tr,Ob):
 #     '''Compute p(o) and the marginal probabilities p(x_t|o) for a Markov model
