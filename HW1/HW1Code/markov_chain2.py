@@ -173,42 +173,63 @@ for t in range(L-2,-1,-1):
     p[t,:] = np.multiply(r[t,:],f[t,:])
     p[t,:] /= p[t,:].sum()
 
-print 'time 6 reverse messages:',r[6,:]
-print 'time 6 forward messages:', f[6,:]
-
-print 'time 6 marginal probs'
-print p[6,:]
-
-print 'First 5 Files:'
+print
+print 'Files corresponding to first 5 sequences:'
 for i in range(0,5):
     print filenames[i]
 
-# function markovMarginals(x,o,p0,Tr,Ob):
-#     '''Compute p(o) and the marginal probabilities p(x_t|o) for a Markov model
-#        defined by P[xt=j|xt-1=i] = Tr(i,j) and P[ot=k|xt=i] = Ob(i,k) as numpy matrices'''
-#     dx,do = Ob.shape()   # if a numpy matrix
-#     L = len(o)
-#     f = np.zeros((L,dx))
-#     r = np.zeros((L,dx))
-#     p = np.zeros((L,dx))
-#
-#     f[0,:] = ...   # compute initial forward message
-#     log_pO = ...   # update probability of sequence so far
-#     f[0,:] /= f[0,:].sum()  # normalize (to match definition of f)
-#
-#     for t in range(1,L):    # compute forward messages
-#         f[t,:] = ...
-#         log_pO += ...
-#         f[t,:] /= f[t,:].sum()
-#
-#     r[L,:] = 1.0  # initialize reverse messages
-#     p[L,:] = ...  # and marginals
-#
-#     for t in range(L-1,-1,-1):
-#         r[t,:] = ...
-#         r[t,:] /= r[t,:].sum()
-#         p[t,:] = ...
-#         p[t,:] /= p[t,:].sum()
-#
-#     return log_pO, p
+def markovMarginals(x,o,p0,Tr,Ob):
+    dx,do = Ob.shape   # if a numpy matrix
+    L = len(o)
+    f = np.zeros((L,dx))
+    r = np.zeros((L,dx))
+    p = np.zeros((L,dx))
 
+    p0 = np.reshape(p0vals, (dx, 1))
+    compF = np.multiply(Ob[:, o[0]], p0)
+    f[0, :] = np.reshape(compF, dx)  # compute initial forward message
+    log_pO = np.log(f[0,:].sum())   # update probability of sequence so far
+    f[0,:] /= f[0,:].sum()  # normalize (to match definition of f)
+
+    for t in range(1,L):    # compute forward messages
+        prevF = np.reshape(f[t - 1, :], (1, dx))
+        curXprobs = np.transpose(prevF * Tr)
+        curObcol = Ob[:, o[t]]
+        f[t, :] = np.reshape(np.multiply(curXprobs, curObcol), dx)
+        log_pO += np.log(f[t, :].sum())
+        f[t, :] /= f[t, :].sum()  # normalize (to match definition of f)
+
+    r[L-1,:] = 1.0  # initialize reverse messages
+    p[L-1,:] = np.multiply(r[L-1,:],f[L-1,:])  # and marginals
+
+    for t in range(L-2,-1,-1):
+        prevR = np.reshape(r[t + 1, :], (dx, 1))
+        curObcol = Ob[:, o[t + 1]]
+        curCol = np.matrix(np.multiply(prevR, curObcol))
+        r[t, :] = np.reshape(Tr * curCol, dx)
+        r[t, :] /= r[t, :].sum()
+        p[t, :] = np.multiply(r[t, :], f[t, :])
+        p[t, :] /= p[t, :].sum()
+
+    return log_pO, p
+
+fileNum=0
+curObs = o[fileNum]
+[logp,pFor0] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
+print
+print 'p6 for sequence 0:'
+print pFor0[6,:]
+
+fileNum=2
+curObs = o[fileNum]
+[logp,pFor2] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
+print
+print 'p9 for sequence 2:'
+print pFor2[9,:]
+
+fileNum=4
+curObs = o[fileNum]
+[logp,pFor4] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
+print 
+print 'logp for sequence 4:'
+print logp
