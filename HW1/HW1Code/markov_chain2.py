@@ -230,6 +230,6 @@ print pFor2[9,:]
 fileNum=4
 curObs = o[fileNum]
 [logp,pFor4] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
-print 
+print
 print 'logp for sequence 4:'
 print logp

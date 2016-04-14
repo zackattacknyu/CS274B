@@ -375,4 +375,67 @@ Emission Probability Matrix (first 5 states) is as follows:
 
 For each sequence, we will append a value at the end signifying the end state. In the transition matrix, we will add a row and column that signify the "end" value. 
 
+\subsection*{Part E}
+
+Here is my Markov Maginals function
+
+\begin{lstlisting}
+def markovMarginals(x,o,p0,Tr,Ob):
+    dx,do = Ob.shape   # if a numpy matrix
+    L = len(o)
+    f = np.zeros((L,dx))
+    r = np.zeros((L,dx))
+    p = np.zeros((L,dx))
+
+    p0 = np.reshape(p0vals, (dx, 1))
+    compF = np.multiply(Ob[:, o[0]], p0)
+    f[0, :] = np.reshape(compF, dx)  # compute initial forward message
+    log_pO = np.log(f[0,:].sum())   # update probability of sequence so far
+    f[0,:] /= f[0,:].sum()  # normalize (to match definition of f)
+
+    for t in range(1,L):    # compute forward messages
+        prevF = np.reshape(f[t - 1, :], (1, dx))
+        curXprobs = np.transpose(prevF * Tr)
+        curObcol = Ob[:, o[t]]
+        f[t, :] = np.reshape(np.multiply(curXprobs, curObcol), dx)
+        log_pO += np.log(f[t, :].sum())
+        f[t, :] /= f[t, :].sum()  # normalize (to match definition of f)
+
+    r[L-1,:] = 1.0  # initialize reverse messages
+    p[L-1,:] = np.multiply(r[L-1,:],f[L-1,:])  # and marginals
+
+    for t in range(L-2,-1,-1):
+        prevR = np.reshape(r[t + 1, :], (dx, 1))
+        curObcol = Ob[:, o[t + 1]]
+        curCol = np.matrix(np.multiply(prevR, curObcol))
+        r[t, :] = np.reshape(Tr * curCol, dx)
+        r[t, :] /= r[t, :].sum()
+        p[t, :] = np.multiply(r[t, :], f[t, :])
+        p[t, :] /= p[t, :].sum()
+
+    return log_pO, p
+\end{lstlisting}
+\newpage
+I printed out the files for the first 5 sequences as well as the requested probabilities. Here is the result
+
+\begin{lstlisting}
+Files corresponding to first 5 sequences:
+12as.txt
+153l.txt
+16pk.txt
+16vp.txt
+1914.txt
+
+p6 for sequence 0:
+[  1.02101704e-01   5.60632171e-03   1.54825441e-01   2.52220214e-02
+   6.45436063e-01   3.70925988e-06   6.67175945e-02   8.71440954e-05]
+
+p9 for sequence 2:
+[  1.92279325e-01   2.16531983e-02   2.04049763e-01   5.81202218e-02
+   2.37895589e-01   2.72872172e-04   2.85012935e-01   7.16096328e-04]
+
+logp for sequence 4:
+-493.736667034
+\end{lstlisting}
+
 \end{document}
