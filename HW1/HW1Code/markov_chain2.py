@@ -49,6 +49,8 @@ for i in range(mSeq):
 Tsum = np.matrix(np.sum(Tmatrix,axis=1))
 Tsum = np.transpose(Tsum)
 TsumTiled = np.matlib.repmat(Tsum,1,8)
+print 'Unnormalized T'
+print Tmatrix[0:5,0:5]
 Tmatrix = np.divide(Tmatrix,TsumTiled)
 print 'Transition Matrix (first 5 states) is as follows:'
 print Tmatrix[0:5,0:5]
@@ -97,6 +99,20 @@ Omatrix = np.divide(Omatrix,OsumTiled)
 print
 print 'Emission Probability Matrix (first 5 states) is as follows:'
 print Omatrix[0:5,0:5]
+
+Ob = np.copy(Omatrix);
+dx,do2 = Ob.shape   # if a numpy matrix
+L = len(o)
+f = np.zeros((L,dx))
+r = np.zeros((L,dx))
+p = np.zeros((L,dx))
+
+print 'New Vars:'
+print dx
+print do2
+initF = np.matrix(np.sum(Ob,axis=1))
+print initF
+#f[0,:] = ...   # compute initial forward message
 
 
 

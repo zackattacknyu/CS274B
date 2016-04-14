@@ -194,6 +194,7 @@ This would cause us to update probabilities for $\textit{ray\_says\_screen\_is\_
 If we observe just $\textit{power\_in\_projector}$ then the same variables from Part D will have their probabilities changed.\\
 We would also update the probability for $\textit{projector\_switch\_on}$\\
 We would also have to update $\textit{power\_in\_building}$ and $\textit{power\_in\_wire}$\\
+It would propagate and affect $\textit{Sam\_reading\_book}$ and $\textit{room\_light\_on}$
 
 
 \newpage
@@ -251,7 +252,7 @@ Approximately
 \[
 \bigtriangledown A(\theta) = [0.91937,0.80978]
 \]
-This is also the expected value of the distribution if $\theta=[1,2]$
+This is also the expected value of $x$ and $xy$ respectively if $\theta=[1,2]$
 
 \newpage
 
@@ -372,6 +373,6 @@ Emission Probability Matrix (first 5 states) is as follows:
 
 \subsection*{Part D}
 
-We can treat the length as another random variable $Y$ and see which variables influcence it.
+For each sequence, we will append a value at the end signifying the end state. In the transition matrix, we will add a row and column that signify the "end" value. 
 
 \end{document}
