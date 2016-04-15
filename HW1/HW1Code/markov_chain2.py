@@ -250,13 +250,13 @@ print logp
 # print toyPmatrix
 
 #toyT = np.matrix([[0.9,0.05,0.05],[0.05,0.9,0.05],[0.05,0.05,0.9]])
-toyT = np.matrix([[0.05,0.9,0.05],[0.05,0.05,0.9],[0.9,0.05,0.05]])
-toyOmat = np.matrix([[0.9,0.05,0.05],[0.05,0.9,0.05],[0.05,0.05,0.9]])
+toyT = np.matrix([[0.1,0.8,0.1],[0.1,0.1,0.8],[0.8,0.1,0.1]])
+toyOmat = np.matrix([[0.8,0.1,0.1],[0.1,0.8,0.1],[0.1,0.1,0.8]])
 toyP0 = np.matrix([0.33,0.33,0.34])
 toyObs = np.array([1, 2, 0, 1, 2, 0, 1])
 
 [toyLog,toyPmatrix] = markovMarginals(x,toyObs,toyP0,toyT,toyOmat)
 
-print 
+print
 print 'Toy P Matrix:'
 print toyPmatrix
