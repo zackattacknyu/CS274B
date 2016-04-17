@@ -212,8 +212,9 @@ def markovMarginals(x,o,p0,Tr,Ob):
         p[t, :] /= p[t, :].sum()
 
     Xsequence = np.add(np.zeros(L),-1)
-    rInit = np.reshape(r[0,:],(dx,1))
-    Xsequence[0] = np.argmax(np.multiply(rInit, p0))
+    rInit = np.reshape(r[0,:],(1,dx))
+    pInit = np.reshape(p0,(1,dx))
+    Xsequence[0] = np.argmax(np.multiply(rInit, pInit))
     for jj in range(1, L):
         prevX = Xsequence[jj-1]
         TmatRow = Tr[prevX,:]
@@ -255,6 +256,17 @@ print xseq2
 print
 print 'Most Likely Sequence for File 4:'
 print xseq4
+
+total = len(o)
+numTry = 10
+inds = np.floor(np.multiply(np.random.rand(numTry),total))
+for fileNum in inds:
+    curObs = o[int(fileNum)]
+    [logp, pFor4, xseqCur] = markovMarginals(x, curObs, p0col, Tmatrix, Omatrix)
+    print
+    print 'Most Likely Sequence for File: ' + str(fileNum)
+    print xseqCur
+
 #toy example
 # toyT = np.matrix([[0.2,0.3,0.5],[0.4,0.2,0.4],[0.3,0.6,0.1]])
 # toyOmat = np.matrix([[0.8,0.1,0.1],[0.1,0.4,0.5],[0.7,0.2,0.1]])
