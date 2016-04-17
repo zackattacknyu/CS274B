@@ -211,29 +211,50 @@ def markovMarginals(x,o,p0,Tr,Ob):
         p[t, :] = np.multiply(r[t, :], f[t, :])
         p[t, :] /= p[t, :].sum()
 
-    return log_pO, p
+    Xsequence = np.add(np.zeros(L),-1)
+    rInit = np.reshape(r[0,:],(dx,1))
+    Xsequence[0] = np.argmax(np.multiply(rInit, p0))
+    for jj in range(1, L):
+        prevX = Xsequence[jj-1]
+        TmatRow = Tr[prevX,:]
+        currentR = np.reshape(r[jj,:],(1,dx))
+        curNextProbs = np.multiply(currentR,TmatRow)
+        Xsequence[jj] = np.argmax(curNextProbs)
+
+    return log_pO, p, Xsequence
 
 fileNum=0
 curObs = o[fileNum]
-[logp,pFor0] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
+[logp,pFor0,xseq0] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
 print
 print 'p6 for sequence 0:'
 print pFor0[6,:]
 
 fileNum=2
 curObs = o[fileNum]
-[logp,pFor2] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
+[logp,pFor2,xseq2] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
 print
 print 'p9 for sequence 2:'
 print pFor2[9,:]
 
 fileNum=4
 curObs = o[fileNum]
-[logp,pFor4] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
+[logp,pFor4,xseq4] = markovMarginals(x,curObs,p0col,Tmatrix,Omatrix)
 print
 print 'logp for sequence 4:'
 print logp
 
+print
+print 'Most Likely Sequence for File 0:'
+print xseq0
+
+print
+print 'Most Likely Sequence for File 2:'
+print xseq2
+
+print
+print 'Most Likely Sequence for File 4:'
+print xseq4
 #toy example
 # toyT = np.matrix([[0.2,0.3,0.5],[0.4,0.2,0.4],[0.3,0.6,0.1]])
 # toyOmat = np.matrix([[0.8,0.1,0.1],[0.1,0.4,0.5],[0.7,0.2,0.1]])
@@ -255,8 +276,12 @@ toyOmat = np.matrix([[0.8,0.1,0.1],[0.1,0.8,0.1],[0.1,0.1,0.8]])
 toyP0 = np.matrix([0.33,0.33,0.34])
 toyObs = np.array([1, 2, 0, 1, 2, 0, 1])
 
-[toyLog,toyPmatrix] = markovMarginals(x,toyObs,toyP0,toyT,toyOmat)
+[toyLog,toyPmatrix,xseq] = markovMarginals(x,toyObs,toyP0,toyT,toyOmat)
 
 print
 print 'Toy P Matrix:'
 print toyPmatrix
+
+print
+print 'Most Likely States:'
+print xseq
