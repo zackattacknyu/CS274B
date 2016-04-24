@@ -42,6 +42,9 @@ for i in range(n):
                     curTerm += jointTerm*np.log(jointTerm/denomTerm)
         mutualInfo[i, j] = curTerm
 
+#each entry should be close to zero, which does occur
+#print mutualInfo-np.transpose(mutualInfo)
+
 #for verification, calculate entropy
 entropy = np.zeros(n)
 for i in range(n):
@@ -50,12 +53,38 @@ for i in range(n):
         curProbTerm = probXj[i,k]
         enTerm += curProbTerm*np.log(curProbTerm)
     entropy[i] = -enTerm
-print entropy
+#print entropy
 
 #look at diagnoal of mutual info matrix for entropy
 mutualInfoEntropy = np.zeros(n)
 for i in range(n):
     mutualInfoEntropy[i] = mutualInfo[i,i]
-print mutualInfoEntropy
+#print mutualInfoEntropy
+
+#Part C
+#I will add max weight edges
+
+edges = np.zeros(n*(n-1)/2)
+edgeNodeID = np.zeros((n*(n-1)/2,2))
+edgeInd = 0
+for i in range(n):
+    for j in range(i+1,n):
+        edges[edgeInd] = mutualInfo[i, j]
+        edgeNodeID[edgeInd,:] = [i, j]
+        edgeInd+=1
+#print edges
+
+sortedEdges = np.sort(edges)[::-1]
+sortedEdgeID = np.argsort(edges)[::-1]
+#print sortedEdges
+
+adjMatrix = np.zeros((n,n))
+for curI in range(len(sortedEdges)):
+    curEdgeID = sortedEdgeID[curI]
+    curNode0 = edgeNodeID[curEdgeID, 0]
+    curNode1 = edgeNodeID[curEdgeID, 1]
+    #check if path of any length between node 0 and 1
+    #add to adj matrix if not
+
 
 
