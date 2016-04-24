@@ -42,5 +42,20 @@ for i in range(n):
                     curTerm += jointTerm*np.log(jointTerm/denomTerm)
         mutualInfo[i, j] = curTerm
 
-#print mutualInfo
+#for verification, calculate entropy
+entropy = np.zeros(n)
+for i in range(n):
+    enTerm = 0
+    for k in range(2):
+        curProbTerm = probXj[i,k]
+        enTerm += curProbTerm*np.log(curProbTerm)
+    entropy[i] = -enTerm
+print entropy
+
+#look at diagnoal of mutual info matrix for entropy
+mutualInfoEntropy = np.zeros(n)
+for i in range(n):
+    mutualInfoEntropy[i] = mutualInfo[i,i]
+print mutualInfoEntropy
+
 
