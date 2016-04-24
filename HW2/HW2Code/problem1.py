@@ -106,22 +106,57 @@ for curI in range(len(sortedEdges)):
 
 #print adjMatrix
 
-plt.hold(True)
-plt.plot(loc[:,1],loc[:,0],'ro')
-for i in range(n):
-    for j in range(i+1,n):
-        node0 = loc[i,:]
-        node1 = loc[j,:]
-        xx = [node0[1],node1[1]];
-        yy = [node0[0],node1[0]]
-        if adjMatrix[i,j]>0:
-            plt.plot(xx,yy,'b-')
-plt.title('Weather Station Locations with Chow-Liu Tree')
-plt.xlabel('Longitude')
-plt.ylabel('Latitude')
-plt.show()
+# plt.hold(True)
+# plt.plot(loc[:,1],loc[:,0],'ro')
+# for i in range(n):
+#     for j in range(i+1,n):
+#         node0 = loc[i,:]
+#         node1 = loc[j,:]
+#         xx = [node0[1],node1[1]];
+#         yy = [node0[0],node1[0]]
+#         if adjMatrix[i,j]>0:
+#             plt.plot(xx,yy,'b-')
+# plt.title('Weather Station Locations with Chow-Liu Tree')
+# plt.xlabel('Longitude')
+# plt.ylabel('Latitude')
+# plt.show()
 
+def getAdjList(adjMatrix):
+    mm,xx = adjMatrix.shape
+    visited = np.zeros((mm))
+    adjList = []
+    listVertices = []
+    for i in range(mm):
+        visited[i] = 1
+        adjVertices = np.where(adjMatrix[i,:]>0)
+        verticesAdd = []
+        for j in adjVertices[0]:
+            if visited[j] <= 0:
+                verticesAdd.append(j)
+        if len(verticesAdd) > 0:
+            adjList.append(verticesAdd)
+            listVertices.append(i)
+    return listVertices,adjList
 
+listVertices,adjList = getAdjList(adjMatrix)
+for i in range(len(listVertices)):
+    print listVertices[i],adjList[i]
 
-
+#Part D
+# Calculate the likelihood
+loglike = 0
+for ii in range(m):
+    sampleVals = D[ii,:]
+    for jj in range(len(listVertices)):
+        #This calculates the p(x_j) term in log-likelihood
+        curJind = listVertices[jj]
+        curXjVal = sampleVals[curJind]
+        curProbXj = probXj[curJind,curXjVal]
+        loglike += np.log(curProbXj)
+        for kk in adjList[jj]:
+            curXkval = sampleVals[kk]
+            jointProb = probXjk[curJind,kk,curXjVal,curXkval]
+            marginalProb = jointProb/curProbXj
+            loglike += np.log(marginalProb)
+print loglike/m
 

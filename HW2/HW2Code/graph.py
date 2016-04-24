@@ -62,21 +62,23 @@ testadj[5,10] = 1
 
 testadj = testadj + np.transpose(testadj)
 
-#def getAdjList()
+def getAdjList(adjMatrix):
+    mm,xx = adjMatrix.shape
+    visited = np.zeros((mm))
+    adjList = []
+    listVertices = []
+    for i in range(mm):
+        visited[i] = 1
+        adjVertices = np.where(adjMatrix[i,:]>0)
+        verticesAdd = []
+        for j in adjVertices[0]:
+            if visited[j] <= 0:
+                verticesAdd.append(j)
+        if len(verticesAdd) > 0:
+            adjList.append(verticesAdd)
+            listVertices.append(i)
+    return listVertices,adjList
 
-visited = np.zeros((mm))
-adjList = []
-listVertices = []
-for i in range(mm):
-    visited[i] = 1
-    adjVertices = np.where(testadj[i,:]>0)
-    verticesAdd = []
-    for j in adjVertices[0]:
-        if visited[j] <= 0:
-            verticesAdd.append(j)
-    if len(verticesAdd) > 0:
-        adjList.append(verticesAdd)
-        listVertices.append(i)
-
+listVertices,adjList = getAdjList(testadj)
 for i in range(len(listVertices)):
     print listVertices[i],adjList[i]
