@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
 #import pyGM as gm
 
 #Part A
@@ -64,6 +66,19 @@ for i in range(n):
 #Part C
 #I will add max weight edges
 
+def nodesHavePath(adjMatrix,node0,node1):
+
+    n,m = adjMatrix.shape
+    adjMatrix = adjMatrix + np.transpose(adjMatrix)
+    adjPower = np.copy(adjMatrix)
+    adjTotal = np.copy(adjMatrix)
+    for i in range(n):
+        adjPower = np.dot(adjMatrix, adjPower)
+        adjTotal += adjPower
+
+    return (adjTotal[node0,node1]>0)
+
+
 edges = np.zeros(n*(n-1)/2)
 edgeNodeID = np.zeros((n*(n-1)/2,2))
 edgeInd = 0
@@ -83,8 +98,30 @@ for curI in range(len(sortedEdges)):
     curEdgeID = sortedEdgeID[curI]
     curNode0 = edgeNodeID[curEdgeID, 0]
     curNode1 = edgeNodeID[curEdgeID, 1]
+
     #check if path of any length between node 0 and 1
     #add to adj matrix if not
+    if not nodesHavePath(adjMatrix,curNode0,curNode1):
+        adjMatrix[curNode0,curNode1]=1
+
+#print adjMatrix
+
+plt.hold(True)
+plt.plot(loc[:,1],loc[:,0],'ro')
+for i in range(n):
+    for j in range(i+1,n):
+        node0 = loc[i,:]
+        node1 = loc[j,:]
+        xx = [node0[1],node1[1]];
+        yy = [node0[0],node1[0]]
+        if adjMatrix[i,j]>0:
+            plt.plot(xx,yy,'b-')
+plt.title('Weather Station Locations with Chow-Liu Tree')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.show()
+
+
 
 
 
