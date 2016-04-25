@@ -38,12 +38,12 @@ for i in range(n):
         curTerm = 0
         for k1 in range(2):
             for k2 in range(2):
-                denomTerm = probXj[i,k1]*probXj[i,k2]
+                denomTerm = probXj[i,k1]*probXj[j,k2]
                 jointTerm = probXjk[i, j, k1, k2]
                 if denomTerm>0 and jointTerm>0:
                     curTerm += jointTerm*np.log(jointTerm/denomTerm)
         mutualInfo[i, j] = curTerm
-
+print mutualInfo[0:5,0:5]
 #each entry should be close to zero, which does occur
 #print mutualInfo-np.transpose(mutualInfo)
 
@@ -106,20 +106,20 @@ for curI in range(len(sortedEdges)):
 
 #print adjMatrix
 
-# plt.hold(True)
-# plt.plot(loc[:,1],loc[:,0],'ro')
-# for i in range(n):
-#     for j in range(i+1,n):
-#         node0 = loc[i,:]
-#         node1 = loc[j,:]
-#         xx = [node0[1],node1[1]];
-#         yy = [node0[0],node1[0]]
-#         if adjMatrix[i,j]>0:
-#             plt.plot(xx,yy,'b-')
-# plt.title('Weather Station Locations with Chow-Liu Tree')
-# plt.xlabel('Longitude')
-# plt.ylabel('Latitude')
-# plt.show()
+plt.hold(True)
+plt.plot(loc[:,1],loc[:,0],'ro')
+for i in range(n):
+    for j in range(i+1,n):
+        node0 = loc[i,:]
+        node1 = loc[j,:]
+        xx = [node0[1],node1[1]];
+        yy = [node0[0],node1[0]]
+        if adjMatrix[i,j]>0:
+            plt.plot(xx,yy,'b-')
+plt.title('Weather Station Locations with Chow-Liu Tree')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.show()
 
 def getAdjList(adjMatrix):
     mm,xx = adjMatrix.shape
