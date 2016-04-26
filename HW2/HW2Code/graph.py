@@ -82,3 +82,9 @@ def getAdjList(adjMatrix):
 listVertices,adjList = getAdjList(testadj)
 for i in range(len(listVertices)):
     print listVertices[i],adjList[i]
+
+f12 = np.ones((3,3))
+f13 = np.ones((3,3))
+print f12*f13
+print sum(f12*f13,3)
+
