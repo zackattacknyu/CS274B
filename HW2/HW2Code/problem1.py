@@ -106,20 +106,22 @@ for curI in range(len(sortedEdges)):
 
 #print adjMatrix
 
-plt.hold(True)
-plt.plot(loc[:,1],loc[:,0],'ro')
-for i in range(n):
-    for j in range(i+1,n):
-        node0 = loc[i,:]
-        node1 = loc[j,:]
-        xx = [node0[1],node1[1]];
-        yy = [node0[0],node1[0]]
-        if adjMatrix[i,j]>0:
-            plt.plot(xx,yy,'b-')
-plt.title('Weather Station Locations with Chow-Liu Tree')
-plt.xlabel('Longitude')
-plt.ylabel('Latitude')
-plt.show()
+showGraph = False #change to true if I want to display it
+if showGraph:
+    plt.hold(True)
+    plt.plot(loc[:,1],loc[:,0],'ro')
+    for i in range(n):
+        for j in range(i+1,n):
+            node0 = loc[i,:]
+            node1 = loc[j,:]
+            xx = [node0[1],node1[1]];
+            yy = [node0[0],node1[0]]
+            if adjMatrix[i,j]>0:
+                plt.plot(xx,yy,'b-')
+    plt.title('Weather Station Locations with Chow-Liu Tree')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.show()
 
 def getAdjList(adjMatrix):
     mm,xx = adjMatrix.shape
@@ -144,19 +146,35 @@ for i in range(len(listVertices)):
 
 #Part D
 # Calculate the likelihood
-loglike = 0
-for ii in range(m):
-    sampleVals = D[ii,:]
-    for jj in range(len(listVertices)):
-        #This calculates the p(x_j) term in log-likelihood
-        curJind = listVertices[jj]
-        curXjVal = sampleVals[curJind]
-        curProbXj = probXj[curJind,curXjVal]
-        loglike += np.log(curProbXj)
-        for kk in adjList[jj]:
-            curXkval = sampleVals[kk]
-            jointProb = probXjk[curJind,kk,curXjVal,curXkval]
-            marginalProb = jointProb/curProbXj
-            loglike += np.log(marginalProb)
-print loglike/m
+# loglike = 0
+# for ii in range(m):
+#     sampleVals = D[ii,:]
+#     for jj in range(len(listVertices)):
+#         #This calculates the p(x_j) term in log-likelihood
+#         curJind = listVertices[jj]
+#         curXjVal = sampleVals[curJind]
+#         curProbXj = probXj[curJind,curXjVal]
+#         loglike += np.log(curProbXj)
+#         for kk in adjList[jj]:
+#             curXkval = sampleVals[kk]
+#             jointProb = probXjk[curJind,kk,curXjVal,curXkval]
+#             marginalProb = jointProb/curProbXj
+#             loglike += np.log(marginalProb)
+# print loglike/m
 
+#Calculate likelihood using Slide 6 method of summing empiricial entropy and mutual information
+entropyPart = entropy.sum()
+#print entropy
+#print entropyPart
+
+mutualInfoPart = 0
+for jj in range(len(listVertices)):
+    curJind = listVertices[jj]
+    for kk in adjList[jj]:
+        mutualInfoPart += mutualInfo[curJind,kk]
+#print mutualInfoPart
+
+loglike = mutualInfoPart - entropyPart
+
+print 'Log Likelihood:'
+print loglike
