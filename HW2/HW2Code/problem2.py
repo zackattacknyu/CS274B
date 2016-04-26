@@ -60,4 +60,29 @@ for i in range(n):
             for kval in range(2):
                 probXjGivenK[i,j,jval,kval] = probXjk[i,j,jval,kval]/probXj[j,kval]
 
-print probXjGivenK
+def getAdjList(adjMatrix):
+    mm,xx = adjMatrix.shape
+    visited = np.zeros((mm))
+    adjList = []
+    listVertices = []
+    for i in range(mm):
+        visited[i] = 1
+        adjVertices = np.where(adjMatrix[i,:]>0)
+        verticesAdd = []
+        for j in adjVertices[0]:
+            if visited[j] <= 0:
+                verticesAdd.append(j)
+        if len(verticesAdd) > 0:
+            adjList.append(verticesAdd)
+            listVertices.append(i)
+    return listVertices,adjList
+
+listVertices,adjList = getAdjList(adjMatrix)
+for i in range(len(listVertices)):
+    print listVertices[i],adjList[i]
+
+for jj in range(len(listVertices)):
+    curJind = listVertices[jj]
+    for kk in adjList[jj]:
+        print probXjGivenK[curJind,kk,:,:]
+
