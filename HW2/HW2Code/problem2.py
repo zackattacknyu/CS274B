@@ -18,21 +18,22 @@ for curI in range(nEdges):
 print loc.shape
 
 #Part A
-
-plt.hold(True)
-plt.plot(loc[:,1],loc[:,0],'ro')
-for i in range(nNodes):
-    for j in range(i+1,nNodes):
-        node0 = loc[i,:]
-        node1 = loc[j,:]
-        xx = [node0[1],node1[1]];
-        yy = [node0[0],node1[0]]
-        if adjMatrix[i,j]>0:
-            plt.plot(xx,yy,'b-')
-plt.title('Weather Station Locations with Loopy Model')
-plt.xlabel('Longitude')
-plt.ylabel('Latitude')
-plt.show()
+showAplot = False
+if showAplot:
+    plt.hold(True)
+    plt.plot(loc[:,1],loc[:,0],'ro')
+    for i in range(nNodes):
+        for j in range(i+1,nNodes):
+            node0 = loc[i,:]
+            node1 = loc[j,:]
+            xx = [node0[1],node1[1]];
+            yy = [node0[0],node1[0]]
+            if adjMatrix[i,j]>0:
+                plt.plot(xx,yy,'b-')
+    plt.title('Weather Station Locations with Loopy Model')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.show()
 
 #Part B
 
