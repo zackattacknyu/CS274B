@@ -424,19 +424,28 @@ class Factor(object):
     """Eliminate via powered sum, e.g., f(x_2) =  \\root^{1/p}{ sum_{x_1} F(x_1,x_2)^p } = F.sumPower(x[1],p)"""
     if (elim is None):
       elim = self.v
-    return (self ** power).sum(elim).powerIP(1.0/power)     # TODO: make more efficient?
+    #return (self ** power).sum(elim).powerIP(1.0/power)     # fails if elim = self.v?
+    tmp = (self ** power).sum(elim)
+    tmp **= (1.0/power)
+    return tmp
+    #return (self ** power).sum(elim)**(1.0/power)     # TODO: make more efficient?
 
   def lse(self, elim=None, out=None):
     """Eliminate via log-sum-exp on F, e.g., f(x_2) = log sum_{x_1} exp F(x_1,x_2) = F.lse(x[1])"""
     if (elim is None):
       elim = self.v
-    return self.__opReduce1(self.v & elim,np.logaddexp, -np.inf)  # TODO: make more efficient!
+    return self.__opReduce3(self.v & elim,np.logaddexp.reduce, out=out)
+    #return self.__opReduce1(self.v & elim,np.logaddexp, -np.inf)  # TODO: make more efficient!
 
   def lsePower(self, elim=None, power=1.0, out=None):
     """Eliminate via powered log-sum-exp, e.g., f(x_2) = 1/p log sum_{x_1} exp F(x_1,x_2)*p = F.lsePower(x[1],p)"""
     if (elim is None):
       elim = self.v
-    return (self*power).lse(elim).__imul__(1.0/power)      # TODO: make more efficient?
+    #return (self*power).lse(elim).__imul__(1.0/power)      # fails if elim = self.v?
+    tmp = (self*power).lse(elim)
+    tmp *= (1.0/power)
+    return tmp
+    #return (self*power).lse(elim)*(1.0/power)      # TODO: make more efficient?
 
   def max(self, elim=None, out=None):
     """Eliminate via max on F, e.g., f(x_2) = max_{x_1} F(x_1,x_2) = F.max(x[1])"""
@@ -645,6 +654,27 @@ class Factor(object):
       #return Factor().__build( VarSet(self.v - elim), t )
       op(self.t, axis=ax, out=out.t)               # any better?  TODO
       return out
+
+  def __opReduce3(self, elim, op, out=None):  # assumes elim <= self.v
+    """Internal reduce / eliminate function; assumes "op" is a numpy build-in (using a ufunc)
+    works with numpy reduce ops that require single axes at a time
+    """
+    if ((elim is None) or (len(elim)==len(self.v))):
+      return op(np.ravel(self.t))
+    else:
+      if (out is None):
+        out = Factor(VarSet(self.v - elim))
+      else:
+        assert (out.v == VarSet(self.v-elim) ), "Cannot eliminate into an existing factor with incorrect scope"
+      ax = tuple(map(lambda x: self.v.index(x), elim))  #
+      src = self.t
+      while len(ax) > 1:
+        src = op(src,axis=ax[-1])
+        ax = ax[:-1]
+      op(src, axis=ax, out=out.t)   
+      return out
+
+
 
 """ NumPy reduce example:
 >>> a = np.arange(24).reshape(2,3,4)

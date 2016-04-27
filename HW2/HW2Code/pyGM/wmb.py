@@ -160,6 +160,7 @@ class WMB(object):
                     if mb.parent is not None:      # if mb has a parent, shift factors around to preserve bound
                         mb.theta -= mb.msgFwd
                         mb.parent.theta += mb.msgFwd
+                        mb.parent.children.remove(mb)
                     n.theta += mb.theta                # join log-factors into new node
                     n.originals.extend(mb.originals)   # move original factor pointers to new node
                     b.remove(mb)
@@ -219,6 +220,7 @@ class WMB(object):
                 # TODO: merge into largest clique that can fit
                 pass
 
+    #@profile
     def msgForward(self, stepTheta=0.5, stepWeights=0.1):
         """Compute a forward pass through all nodes and return the resulting bound"""
         bound = 0.0
@@ -288,7 +290,7 @@ class WMB(object):
         return float(bound)
 
 
-
+    #@profile
     def msgBackward(self, stepTheta=0.0, stepWeights=0.0, beliefs=None):
         """Compute a backward pass through all nodes
            If beliefs is a list of cliques, returns the estimated beliefs on those cliques
@@ -332,8 +334,9 @@ class WMB(object):
                     if c <= mb.clique and return_beliefs[tuple(c)] is None: return_beliefs[tuple(c)] = beliefs_b[j].lse( mb.clique - c )
                 beliefs_b[j] = Factor().log() # clear out belief
         for c,f in return_beliefs.items(): 
+            f -= f.lse()
             f.expIP()   # exponentiate and normalize beliefs before returning
-            f /= f.sum()
+            #f /= f.sum()
         return return_beliefs
 
 
