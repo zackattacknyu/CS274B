@@ -17,6 +17,7 @@ model_ve = gm.GraphModel(factors) # make a new model (will be modified by VE)
 pri = [1.0 for Xi in X]
 pri[1], pri[3] = 2.0,2.0          # eliminate X1 and X3 last
 order = gm.eliminationOrder(model_ve, orderMethod='minfill', priority=pri)[0]
+print pri
 print order,'\n'
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
@@ -27,3 +28,5 @@ lnZ = np.log(p13.sum())   # can get the (log) partition function as well
 print 'lnZ: ',lnZ,'\n'
 p13 /= p13.sum()
 print p13, '\n',p13.table
+
+print len(factors)
