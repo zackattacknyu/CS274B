@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyGM as gm
 import networkx as nx
+import copy
 
 edges = np.genfromtxt('data/edges.txt')
 loc = np.genfromtxt('data/locations.txt',delimiter=None)
@@ -17,16 +18,25 @@ for curI in range(nEdges):
     curNode1 = edges[curI, 1]
     adjMatrix[curNode0,curNode1] = 1
 
-print loc.shape
+#print loc.shape
 
 #Part A
 
-graph2 = nx.Graph()
-graph2.add_nodes_from(range(n))
-for edgeI in edges:
-    graph2.add_edge(edgeI[0],edgeI[1])
-nx.draw_networkx(graph2,node_color='c',pos=loc)
-print graph2
+showNxPlot = False
+if showNxPlot:
+    graph2 = nx.Graph()
+    graph2.add_nodes_from(range(n))
+    for edgeI in edges:
+        graph2.add_edge(edgeI[0], edgeI[1])
+    loc2 = np.zeros(loc.shape)
+    loc2[:,0] = loc[:,1]
+    loc2[:,1] = loc[:,0]
+    nx.draw_networkx(graph2, node_color='c', pos=loc2)
+    plt.title('Weather Station Locations with Loopy Model')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.show()
+
 showAplot = False
 if showAplot:
     plt.hold(True)
@@ -99,7 +109,7 @@ listVertices,adjList = getAdjList(adjMatrix)
 
 #makes the variables
 gmNodes = [gm.Var(i,2) for i in range(n)]
-print gmNodes
+#print gmNodes
 
 #makes the factors given the loopy model graph we have
 gmFactors = []
@@ -113,11 +123,47 @@ curListInd = 0
 for jj in range(len(listVertices)):
     curJind = listVertices[jj]
     for kk in adjList[jj]:
-        gmFactors[curListInd].table = probXjk[curJind,kk,:,:]
+        #gmFactors[curListInd].table = probXjk[curJind,kk,:,:]
+        inputFactor = np.matrix(np.ones((2,2)))
+        inputFactor = np.multiply(inputFactor,0.25)
+        gmFactors[curListInd].table = inputFactor
         curListInd += 1
 
-for ii in range(len(gmFactors)):
-    print gmFactors[ii]
+#for ii in range(len(gmFactors)):
+#    print gmFactors[ii]
+
+listInd = 0
+sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
+for jj in range(len(listVertices)):
+    curJind = listVertices[jj]
+    for kk in adjList[jj]:
+        print jj,kk
+
+        if listInd>1:
+            print gmFactors[listInd-1].table
+
+        #does variable elimination to get p_ij value
+        currentFactors = copy.deepcopy(gmFactors)
+        curModel = gm.GraphModel(currentFactors)
+        pri = [1.0 for Xi in currentFactors]
+        pri[curJind], pri[kk] = 2.0, 2.0
+        order = gm.eliminationOrder(curModel,orderMethod='minwidth',priority=pri)[0]
+        curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
+        curP = curModel.joint()
+        curLnZ = np.log(curP.sum())
+        print 'lnZ: ', curLnZ, '\n'
+        curP /= curP.sum()
+
+        curLog = 0
+        for ptNum in range(m):
+            curLog += curModel.logValue(D[ptNum,:])
+        print curLog/m
+        #update the factor
+        currentFij = gmFactors[listInd].table
+        probRatio = np.matrix(np.divide(probXjk[curJind,kk,:,:],curP.table))
+        newFij = np.multiply(currentFij,probRatio)
+        gmFactors[listInd].table = newFij
+        listInd+=1
 
 # factors = [ gm.Factor([X[0],X[1]],1.0) , gm.Factor([X[0],X[2]],1.0) , gm.Factor([X[1],X[2]],1.0),
 #             gm.Factor([X[1],X[3]],1.0) , gm.Factor([X[2],X[3]],1.0) , gm.Factor([X[3],X[4]],1.0),
