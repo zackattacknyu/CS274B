@@ -109,38 +109,34 @@ listVertices,adjList = getAdjList(adjMatrix)
 
 #makes the variables
 gmNodes = [gm.Var(i,2) for i in range(n)]
+probNodes = [gm.Var(i,2) for i in range(n)]
 #print gmNodes
 
 #makes the factors given the loopy model graph we have
 gmFactors = []
+probFactors = []
 for jj in range(len(listVertices)):
     curJind = listVertices[jj]
     for kk in adjList[jj]:
         gmFactors.append(gm.Factor([gmNodes[curJind],gmNodes[kk]],1.0))
+        probFactors.append(gm.Factor([probNodes[curJind], probNodes[kk]], 1.0))
 
 #fills the table with the empiricial probabilities we have calculated
 curListInd = 0
 for jj in range(len(listVertices)):
     curJind = listVertices[jj]
     for kk in adjList[jj]:
-        #gmFactors[curListInd].table = probXjk[curJind,kk,:,:]
         inputFactor = np.matrix(np.ones((2,2)))
-        inputFactor = np.multiply(inputFactor,0.25)
+        #inputFactor = np.multiply(inputFactor,0.25)
         gmFactors[curListInd].table = inputFactor
+        probFactors[curListInd].table = probXjk[curJind,kk,:,:]
         curListInd += 1
-
-#for ii in range(len(gmFactors)):
-#    print gmFactors[ii]
 
 listInd = 0
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 for jj in range(len(listVertices)):
     curJind = listVertices[jj]
     for kk in adjList[jj]:
-        print jj,kk
-
-        if listInd>1:
-            print gmFactors[listInd-1].table
 
         #does variable elimination to get p_ij value
         currentFactors = copy.deepcopy(gmFactors)
@@ -151,43 +147,24 @@ for jj in range(len(listVertices)):
         curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
         curP = curModel.joint()
         curLnZ = np.log(curP.sum())
-        print 'lnZ: ', curLnZ, '\n'
+        print 'lnZ: ', curLnZ
         curP /= curP.sum()
 
         curLog = 0
+        probModel = gm.GraphModel(probFactors)
         for ptNum in range(m):
-            curLog += curModel.logValue(D[ptNum,:])
-        print curLog/m
+            curLog += probModel.logValue(D[ptNum,:])
+        print 'logLike: ',curLog/m,'\n'
+
         #update the factor
         currentFij = gmFactors[listInd].table
         probRatio = np.matrix(np.divide(probXjk[curJind,kk,:,:],curP.table))
         newFij = np.multiply(currentFij,probRatio)
         gmFactors[listInd].table = newFij
+
+        newFijNorm = newFij/newFij.sum()
+        probFactors[listInd].table = newFijNorm
+
         listInd+=1
 
-# factors = [ gm.Factor([X[0],X[1]],1.0) , gm.Factor([X[0],X[2]],1.0) , gm.Factor([X[1],X[2]],1.0),
-#             gm.Factor([X[1],X[3]],1.0) , gm.Factor([X[2],X[3]],1.0) , gm.Factor([X[3],X[4]],1.0),
-#             gm.Factor([X[2],X[4]],1.0) , gm.Factor([X[4],X[5]],1.0) , gm.Factor([X[2],X[5]],1.0)]
-#
-# for i in range(len(factors)):               # fill the tables with random values
-#     factors[i].table = np.random.rand(3,3)
-#
-# # Perform variable elimination
-# model_ve = gm.GraphModel(factors) # make a new model (will be modified by VE)
-#
-# pri = [1.0 for Xi in X]
-# pri[1], pri[3] = 2.0,2.0          # eliminate X1 and X3 last
-# order = gm.eliminationOrder(model_ve, orderMethod='minfill', priority=pri)[0]
-# print pri
-# print order,'\n'
-#
-# sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
-# model_ve.eliminate(order[:-2], sumElim)  # eliminate all but last two
-#
-# p13 = model_ve.joint()
-# lnZ = np.log(p13.sum())   # can get the (log) partition function as well
-# print 'lnZ: ',lnZ,'\n'
-# p13 /= p13.sum()
-# print p13, '\n',p13.table
-#
-# print len(factors)
+
