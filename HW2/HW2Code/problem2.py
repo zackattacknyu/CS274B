@@ -132,39 +132,50 @@ for jj in range(len(listVertices)):
         probFactors[curListInd].table = probXjk[curJind,kk,:,:]
         curListInd += 1
 
-listInd = 0
+
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
-for jj in range(len(listVertices)):
-    curJind = listVertices[jj]
-    for kk in adjList[jj]:
 
-        #does variable elimination to get p_ij value
-        currentFactors = copy.deepcopy(gmFactors)
-        curModel = gm.GraphModel(currentFactors)
-        pri = [1.0 for Xi in currentFactors]
-        pri[curJind], pri[kk] = 2.0, 2.0
-        order = gm.eliminationOrder(curModel,orderMethod='minwidth',priority=pri)[0]
-        curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
-        curP = curModel.joint()
-        curLnZ = np.log(curP.sum())
-        print 'lnZ: ', curLnZ
-        curP /= curP.sum()
+numIter=5
+logLikeIter = np.zeros(numIter)
+for iterI in range(numIter):
+    print 'Now computing Iteration: ',iterI
+    listInd = 0
+    for jj in range(len(listVertices)):
+        curJind = listVertices[jj]
+        for kk in adjList[jj]:
 
-        curLog = 0
-        probModel = gm.GraphModel(probFactors)
-        for ptNum in range(m):
-            curLog += probModel.logValue(D[ptNum,:])
-        print 'logLike: ',curLog/m,'\n'
+            #does variable elimination to get p_ij value
+            currentFactors = copy.deepcopy(gmFactors)
+            curModel = gm.GraphModel(currentFactors)
+            pri = [1.0 for Xi in currentFactors]
+            pri[curJind], pri[kk] = 2.0, 2.0
+            order = gm.eliminationOrder(curModel,orderMethod='minwidth',priority=pri)[0]
+            curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
+            curP = curModel.joint()
+            curLnZ = np.log(curP.sum())
+            #print 'lnZ: ', curLnZ
+            curP /= curP.sum()
 
-        #update the factor
-        currentFij = gmFactors[listInd].table
-        probRatio = np.matrix(np.divide(probXjk[curJind,kk,:,:],curP.table))
-        newFij = np.multiply(currentFij,probRatio)
-        gmFactors[listInd].table = newFij
+            curLog = 0
+            probModel = gm.GraphModel(probFactors)
+            for ptNum in range(m):
+                curLog += probModel.logValue(D[ptNum,:])
+            curLog = curLog/m
+            #print 'logLike: ',curLog/m,'\n'
 
-        newFijNorm = newFij/newFij.sum()
-        probFactors[listInd].table = newFijNorm
+            #update the factor
+            currentFij = gmFactors[listInd].table
+            probRatio = np.matrix(np.divide(probXjk[curJind,kk,:,:],curP.table))
+            newFij = np.multiply(currentFij,probRatio)
+            gmFactors[listInd].table = newFij
 
-        listInd+=1
+            newFijNorm = newFij/newFij.sum()
+            probFactors[listInd].table = newFijNorm
+
+            listInd+=1
+    logLikeIter[iterI] = curLog
+
+plt.plot(logLikeIter)
+plt.show()
 
 
