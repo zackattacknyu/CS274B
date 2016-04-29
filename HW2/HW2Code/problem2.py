@@ -140,7 +140,7 @@ for ee in range(nEdges):
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
-numIter=1
+numIter=15
 totalEnt = numIter*nEdges
 logLikeIter = np.zeros(numIter)
 logLikeAll = np.zeros(totalEnt)
@@ -148,7 +148,7 @@ arrInd = 0
 for iterI in range(numIter):
     print 'Now computing Iteration: ',iterI
     for ee in range(nEdges):
-
+        print 'Now processing edge: ',ee
         #print jj,kk
 
         # computes the likelihood of the current probabilistic model
@@ -174,7 +174,7 @@ for iterI in range(numIter):
         curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
         curP = curModel.joint()
         curLnZ = np.log(curP.sum())
-        print 'lnZ: ', curLnZ
+        #print 'lnZ: ', curLnZ
         curP /= curP.sum()
         #print curP.table
 
@@ -201,3 +201,5 @@ plt.xlabel('Number of Complete Iterations Done')
 plt.ylabel('Negative Log Likelihood Of Model')
 plt.show()
 
+print logLikeAll
+print logLikeIter
