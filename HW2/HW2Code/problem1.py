@@ -59,9 +59,9 @@ for i in range(n):
 #print entropy
 
 #look at diagnoal of mutual info matrix for entropy
-mutualInfoEntropy = np.zeros(n)
-for i in range(n):
-    mutualInfoEntropy[i] = mutualInfo[i,i]
+# mutualInfoEntropy = np.zeros(n)
+# for i in range(n):
+#     mutualInfoEntropy[i] = mutualInfo[i,i]
 #print mutualInfoEntropy
 
 #Part C
@@ -145,7 +145,7 @@ listVertices,adjList = getAdjList(adjMatrix)
 for i in range(len(listVertices)):
     print listVertices[i],adjList[i]
 
-showNxPlot = True
+showNxPlot = False
 if showNxPlot:
     graph2 = nx.Graph()
     graph2.add_nodes_from(range(n))
@@ -180,7 +180,12 @@ if showNxPlot:
 # print loglike/m
 
 #Calculate likelihood using Slide 6 method of summing empiricial entropy and mutual information
-entropyPart = entropy.sum()
+#look at diagnoal of mutual info matrix for entropy
+mutualInfoEntropy = np.zeros(n)
+for i in range(n):
+    mutualInfoEntropy[i] = mutualInfo[i,i]
+
+entropyPart = mutualInfoEntropy.sum()
 #print entropy
 #print entropyPart
 

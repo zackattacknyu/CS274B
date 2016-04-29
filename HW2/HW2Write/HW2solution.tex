@@ -226,6 +226,35 @@ plt.show()
 \caption{Chow-Liu Tree as computed in Part C}
 \end{figure}
 
+\subsection*{Part D}
+
+To calculate the likelihood, I used the method in Slide 6 of \textit{Structure Learning in Bayes Nets} where you add together the entropy and mutual information. Here is the code:
+\begin{lstlisting}
+
+#look at diagnoal of mutual info matrix for entropy
+mutualInfoEntropy = np.zeros(n)
+for i in range(n):
+    mutualInfoEntropy[i] = mutualInfo[i,i]
+entropyPart = mutualInfoEntropy.sum()
+
+mutualInfoPart = 0
+for jj in range(len(listVertices)):
+    curJind = listVertices[jj]
+    for kk in adjList[jj]:
+        mutualInfoPart += mutualInfo[curJind,kk]
+
+loglike = mutualInfoPart - entropyPart
+
+print 'Log Likelihood:'
+print loglike
+\end{lstlisting}
+
+Here is the result
+\begin{lstlisting}
+Log Likelihood:
+-11.0986143278
+\end{lstlisting}
+
 \section*{Problem 2:}
 
 \subsection*{Part A}
