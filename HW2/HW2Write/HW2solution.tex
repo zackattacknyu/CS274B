@@ -279,20 +279,33 @@ Here is the loopy model compared with the Chow-Liu Tree Model. The loopy model s
 \caption{Loopy Model and Chow-Liu Tree Model side-by-side}
 \end{figure}
 
+Here is the code I used to generate the loopy model graph
+
+\begin{lstlisting}
+edges = np.genfromtxt('data/edges.txt')
+loc = np.genfromtxt('data/locations.txt',delimiter=None)
+
+graph2 = nx.Graph()
+graph2.add_nodes_from(range(n))
+for edgeI in edges:
+    graph2.add_edge(edgeI[0], edgeI[1])
+loc2 = np.zeros(loc.shape)
+loc2[:,0] = loc[:,1]
+loc2[:,1] = loc[:,0]
+nx.draw_networkx(graph2, node_color='c', pos=loc2)
+plt.title('Weather Station Locations with Loopy Model')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.show()
+\end{lstlisting}
+
 \newpage
 
 \subsection*{Part B}
 
 Here is the code for the empirical marginal probabilities
 \begin{lstlisting}
-#this find phat for each variable
-posXcount = np.sum(D,axis=0)
-probXj = np.zeros((n,2))
-probXj[:, 1] = np.divide(posXcount,m)
-probXj[:, 0] = 1-probXj[:,1]
 
-#this find phat(x_j,x_k) for each pair of variables
-# next dimension is probability of j, then prob of k
 probXjk = np.zeros((n,n,2,2))
 for i in range(n):
     for j in range(n):
@@ -300,36 +313,33 @@ for i in range(n):
             probXjk[i, j, D[k, i], D[k, j]] += 1
 probXjk = np.divide(probXjk,m)
 
-#find phat(x_j|x_k)
-probXjGivenK = np.zeros((n,n,2,2))
-for i in range(n):
-    for j in range(n):
-        for jval in range(2):
-            for kval in range(2):
-                probXjGivenK[i,j,jval,kval] = probXjk[i,j,jval,kval]/probXj[j,kval]
-
-def getAdjList(adjMatrix):
-    mm,xx = adjMatrix.shape
-    visited = np.zeros((mm))
-    adjList = []
-    listVertices = []
-    for i in range(mm):
-        visited[i] = 1
-        adjVertices = np.where(adjMatrix[i,:]>0)
-        verticesAdd = []
-        for j in adjVertices[0]:
-            if visited[j] <= 0:
-                verticesAdd.append(j)
-        if len(verticesAdd) > 0:
-            adjList.append(verticesAdd)
-            listVertices.append(i)
-    return listVertices,adjList
-
-listVertices,adjList = getAdjList(adjMatrix)
+edgeMarginals = np.zeros((nEdges,2,2))
+for ee in range(nEdges):
+    node0 = edges[ee,0]
+    node1 = edges[ee,1]
+    edgeMarginals[ee,:,:] = probXjk[node0,node1,:,:]
+print edgeMarginals[0:5]
 
 \end{lstlisting}
 
-TODO: PRINT OUT RESULTS
+Here are the first 5 empirical marginal probabilities
+
+\begin{lstlisting}
+[[[ 0.59130435  0.11123188]
+  [ 0.03514493  0.26231884]]
+
+ [[ 0.62391304  0.07862319]
+  [ 0.02826087  0.2692029 ]]
+
+ [[ 0.57318841  0.12934783]
+  [ 0.02717391  0.27028986]]
+
+ [[ 0.66014493  0.0423913 ]
+  [ 0.07427536  0.22318841]]
+
+ [[ 0.65543478  0.04710145]
+  [ 0.09637681  0.20108696]]]
+\end{lstlisting}
 
 \subsection*{Part C}
 
