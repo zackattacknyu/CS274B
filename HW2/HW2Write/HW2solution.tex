@@ -7,6 +7,7 @@
 \usepackage{graphicx,color}
 \usepackage{verbatim,url}
 \usepackage{listings}
+\usepackage{subcaption} 
 \usepackage{upquote}
 \usepackage[T1]{fontenc}
 %\usepackage{lmodern}
@@ -267,6 +268,21 @@ Here are the edges of the loopy model:
 \centering
 \includegraphics[width=6in]{loopyModelFigure2.png}
 \caption{Loopy Model Edges}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.4\linewidth]{loopyModelFigure2.png}
+  \caption{A subfigure}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.4\linewidth]{chowLiuTreeFigure2.png}
+  \caption{A subfigure}
+\end{subfigure}
+\caption{A figure with two subfigures}
 \end{figure}
 
 TODO: ADD ANALYSIS
