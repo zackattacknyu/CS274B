@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import networkx as nx
 
 #import pyGM as gm
 
@@ -143,6 +144,22 @@ def getAdjList(adjMatrix):
 listVertices,adjList = getAdjList(adjMatrix)
 for i in range(len(listVertices)):
     print listVertices[i],adjList[i]
+
+showNxPlot = True
+if showNxPlot:
+    graph2 = nx.Graph()
+    graph2.add_nodes_from(range(n))
+    for i in range(len(listVertices)):
+        for j in adjList[i]:
+            graph2.add_edge(listVertices[i],j)
+    loc2 = np.zeros(loc.shape)
+    loc2[:, 0] = loc[:, 1]
+    loc2[:, 1] = loc[:, 0]
+    nx.draw_networkx(graph2, node_color='c', pos=loc2)
+    plt.title('Weather Station Locations with Chow-Liu Tree')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.show()
 
 #Part D
 # Calculate the likelihood
