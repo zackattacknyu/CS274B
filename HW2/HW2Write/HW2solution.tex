@@ -340,84 +340,85 @@ Here are the first 5 empirical marginal probabilities
  [[ 0.65543478  0.04710145]
   [ 0.09637681  0.20108696]]]
 \end{lstlisting}
-
+\newpage
 \subsection*{Part C}
 
-TODO: COMMENT THE CODE, DETAIL ITS PARTS MORE, AND INPUT THE RESULTING FIGURE
+The log partition function stayed constant with a value of $20.7944154168$. \\
+To run IPF, I first initialized the model:
 
 \begin{lstlisting}
-gmNodes = [gm.Var(i,2) for i in range(n)]
-probNodes = [gm.Var(i,2) for i in range(n)]
-#print gmNodes
+edges = np.genfromtxt('data/edges.txt')
+nEdges,cc = edges.shape
 
-#makes the factors given the loopy model graph we have
+#initializes the factors given the loopy model graph we have
+gmNodes = [gm.Var(i,2) for i in range(nEdges)]
+probNodes = [gm.Var(i,2) for i in range(nEdges)]
 gmFactors = []
 probFactors = []
-for jj in range(len(listVertices)):
-    curJind = listVertices[jj]
-    for kk in adjList[jj]:
-        gmFactors.append(gm.Factor([gmNodes[curJind],gmNodes[kk]],1.0))
-        probFactors.append(gm.Factor([probNodes[curJind], probNodes[kk]], 1.0))
+for ee in range(nEdges):
+    jj = int(edges[ee,0])
+    kk = int(edges[ee,1])
+    gmFactors.append(gm.Factor([gmNodes[jj], gmNodes[kk]], 1.0))
+    probFactors.append(gm.Factor([probNodes[jj], probNodes[kk]], 1.0))
 
-#fills the table with the empiricial probabilities we have calculated
-curListInd = 0
-for jj in range(len(listVertices)):
-    curJind = listVertices[jj]
-    for kk in adjList[jj]:
-        #inputFactor = np.matrix(np.ones((3,3))) ; # TEST CODE
-        inputFactor = np.matrix(np.ones((2, 2)))
-        #inputFactor = np.multiply(inputFactor,0.25)
-        gmFactors[curListInd].table = inputFactor
-        probFactors[curListInd].table = probXjk[curJind,kk,:,:]
-        curListInd += 1
+    #fills the table with probabilities
+    inputFactor = np.matrix(np.ones((2, 2)))
+    gmFactors[ee].table = inputFactor
+    probFactors[ee].table = probXjk[jj, kk, :, :]
+\end{lstlisting}
 
+\newpage
+
+After initialization, this is the code I used to run IPF:
+
+\begin{lstlisting}
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
-numIter=6
+numIter=15
+totalEnt = numIter*nEdges
 logLikeIter = np.zeros(numIter)
+logLikeAll = np.zeros(totalEnt)
+arrInd = 0
 for iterI in range(numIter):
     print 'Now computing Iteration: ',iterI
-    listInd = 0
-    for jj in range(len(listVertices)):
-        curJind = listVertices[jj]
-        for kk in adjList[jj]:
-            #print jj,kk
+    for ee in range(nEdges):
+        # computes the likelihood of the current probabilistic model
+        curLog = 0
+        probModel = gm.GraphModel(probFactors)
+        for ptNum in range(m):
+            curLog += probModel.logValue(D[ptNum, :])
+        curLog = -curLog / m
+        logLikeAll[arrInd] = curLog
+        arrInd += 1
 
-            #does variable elimination to get p_ij value
-            currentFactors = copy.deepcopy(gmFactors)
-            curModel = gm.GraphModel(currentFactors)
-            pri = [1.0 for Xi in currentFactors]
-            pri[curJind], pri[kk] = 2.0, 2.0
-            order = gm.eliminationOrder(curModel,orderMethod='minfill',priority=pri)[0]
-            curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
-            curP = curModel.joint()
-            curLnZ = np.log(curP.sum())
-            #print 'lnZ: ', curLnZ
-            curP /= curP.sum()
-            #print curP.table
+        #current edge
+        jj = int(edges[ee, 0])
+        kk = int(edges[ee, 1])
 
-            curLog = 0
-            probModel = gm.GraphModel(probFactors)
-            for ptNum in range(m):
-                curLog += probModel.logValue(D[ptNum,:])
-            curLog = curLog/m
-            #print 'logLike: ',curLog/m,'\n'
+        #does variable elimination to get p_jk value
+        currentFactors = copy.deepcopy(gmFactors)
+        curModel = gm.GraphModel(currentFactors)
+        pri = [1.0 for Xi in currentFactors]
+        pri[jj], pri[kk] = 2.0, 2.0
+        order = gm.eliminationOrder(curModel,orderMethod='minfill',priority=pri)[0]
+        curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
+        curP = curModel.joint()
+        curLnZ = np.log(curP.sum())
+        print 'lnZ: ', curLnZ
+        curP /= curP.sum()
 
-            #update the factor
-            currentFij = gmFactors[listInd].table
-            probRatio = np.matrix(np.divide(probXjk[curJind,kk,:,:],curP.table))
-            newFij = np.multiply(currentFij,probRatio)
-            gmFactors[listInd].table = newFij
+        #update the current f_jk value
+        currentFij = gmFactors[ee].table
+        probRatio = np.matrix(np.divide(probXjk[jj,kk,:,:],curP.table))
+        newFij = np.multiply(currentFij,probRatio)
+        gmFactors[ee].table = newFij
 
-            newFijNorm = newFij/newFij.sum()
-            probFactors[listInd].table = newFijNorm
+        #update the probabilistic model
+        newFijNorm = newFij/newFij.sum()
+        probFactors[ee].table = newFijNorm
 
-            listInd+=1
     logLikeIter[iterI] = curLog
-
-plt.plot(logLikeIter)
-plt.show()
 
 \end{lstlisting}
 

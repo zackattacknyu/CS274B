@@ -83,4 +83,10 @@ listVertices,adjList = getAdjList(testadj)
 for i in range(len(listVertices)):
     print listVertices[i],adjList[i]
 
+vals = [1,2,3,5,9,3,2]
+plt.plot(vals)
+plt.show()
 
+vals2 = [4,5,6,3,4]
+plt.plot(vals2)
+plt.show()

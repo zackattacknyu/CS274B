@@ -120,11 +120,9 @@ listVertices,adjList = getAdjList(adjMatrix)
 # probXjk[0,1,:,:] = [[0.249,0.002,0.311],[0.017,0.024,0.015],[0.029,0.348,0.000]]
 # probXjk[0,2,:,:] = [[0.136,0.118,0.309],[0.003,0.029,0.025],[0.0348,0.014,0.015]]
 
+#initializes the factors given the loopy model graph we have
 gmNodes = [gm.Var(i,2) for i in range(nEdges)]
 probNodes = [gm.Var(i,2) for i in range(nEdges)]
-#print gmNodes
-
-#makes the factors given the loopy model graph we have
 gmFactors = []
 probFactors = []
 for ee in range(nEdges):
@@ -142,17 +140,32 @@ for ee in range(nEdges):
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
-numIter=2
+numIter=1
+totalEnt = numIter*nEdges
 logLikeIter = np.zeros(numIter)
+logLikeAll = np.zeros(totalEnt)
+arrInd = 0
 for iterI in range(numIter):
     print 'Now computing Iteration: ',iterI
     for ee in range(nEdges):
-        jj = int(edges[ee, 0])
-        kk = int(edges[ee, 1])
-        listInd = 0
+
         #print jj,kk
 
-        #does variable elimination to get p_ij value
+        # computes the likelihood of the current probabilistic model
+        curLog = 0
+        probModel = gm.GraphModel(probFactors)
+        for ptNum in range(m):
+            curLog += probModel.logValue(D[ptNum, :])
+        curLog = -curLog / m
+        # print 'logLike: ',curLog,'\n'
+        logLikeAll[arrInd] = curLog
+        arrInd += 1
+
+        #current edge
+        jj = int(edges[ee, 0])
+        kk = int(edges[ee, 1])
+
+        #does variable elimination to get p_jk value
         currentFactors = copy.deepcopy(gmFactors)
         curModel = gm.GraphModel(currentFactors)
         pri = [1.0 for Xi in currentFactors]
@@ -161,29 +174,30 @@ for iterI in range(numIter):
         curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
         curP = curModel.joint()
         curLnZ = np.log(curP.sum())
-        #print 'lnZ: ', curLnZ
+        print 'lnZ: ', curLnZ
         curP /= curP.sum()
         #print curP.table
 
-        curLog = 0
-        probModel = gm.GraphModel(probFactors)
-        for ptNum in range(m):
-            curLog += probModel.logValue(D[ptNum,:])
-        curLog = curLog/m
-        #print 'logLike: ',curLog/m,'\n'
-
-        #update the factor
+        #update the current f_jk value
         currentFij = gmFactors[ee].table
         probRatio = np.matrix(np.divide(probXjk[jj,kk,:,:],curP.table))
         newFij = np.multiply(currentFij,probRatio)
         gmFactors[ee].table = newFij
 
+        #update the probabilistic model
         newFijNorm = newFij/newFij.sum()
         probFactors[ee].table = newFijNorm
 
     logLikeIter[iterI] = curLog
 
-plt.plot(logLikeIter)
+
+plt.plot(np.divide(range(totalEnt),nEdges),logLikeAll)
+plt.xlabel('Number of Complete Iterations Done')
+plt.ylabel('Negative Log Likelihood Of Model')
 plt.show()
 
+plt.plot(logLikeIter)
+plt.xlabel('Number of Complete Iterations Done')
+plt.ylabel('Negative Log Likelihood Of Model')
+plt.show()
 
