@@ -71,13 +71,20 @@ for i in range(n):
             probXjk[i, j, D[k, i], D[k, j]] += 1
 probXjk = np.divide(probXjk,m)
 
+edgeMarginals = np.zeros((nEdges,2,2))
+for ee in range(nEdges):
+    node0 = edges[ee,0]
+    node1 = edges[ee,1]
+    edgeMarginals[ee,:,:] = probXjk[node0,node1,:,:]
+print edgeMarginals[0:5]
+
 #find phat(x_j|x_k)
-probXjGivenK = np.zeros((n,n,2,2))
-for i in range(n):
-    for j in range(n):
-        for jval in range(2):
-            for kval in range(2):
-                probXjGivenK[i,j,jval,kval] = probXjk[i,j,jval,kval]/probXj[j,kval]
+# probXjGivenK = np.zeros((n,n,2,2))
+# for i in range(n):
+#     for j in range(n):
+#         for jval in range(2):
+#             for kval in range(2):
+#                 probXjGivenK[i,j,jval,kval] = probXjk[i,j,jval,kval]/probXj[j,kval]
 
 def getAdjList(adjMatrix):
     mm,xx = adjMatrix.shape
@@ -113,74 +120,67 @@ listVertices,adjList = getAdjList(adjMatrix)
 # probXjk[0,1,:,:] = [[0.249,0.002,0.311],[0.017,0.024,0.015],[0.029,0.348,0.000]]
 # probXjk[0,2,:,:] = [[0.136,0.118,0.309],[0.003,0.029,0.025],[0.0348,0.014,0.015]]
 
-gmNodes = [gm.Var(i,2) for i in range(n)]
-probNodes = [gm.Var(i,2) for i in range(n)]
+gmNodes = [gm.Var(i,2) for i in range(nEdges)]
+probNodes = [gm.Var(i,2) for i in range(nEdges)]
 #print gmNodes
 
 #makes the factors given the loopy model graph we have
 gmFactors = []
 probFactors = []
-for jj in range(len(listVertices)):
-    curJind = listVertices[jj]
-    for kk in adjList[jj]:
-        gmFactors.append(gm.Factor([gmNodes[curJind],gmNodes[kk]],1.0))
-        probFactors.append(gm.Factor([probNodes[curJind], probNodes[kk]], 1.0))
+for ee in range(nEdges):
+    jj = int(edges[ee,0])
+    kk = int(edges[ee,1])
+    gmFactors.append(gm.Factor([gmNodes[jj], gmNodes[kk]], 1.0))
+    probFactors.append(gm.Factor([probNodes[jj], probNodes[kk]], 1.0))
 
-#fills the table with the empiricial probabilities we have calculated
-curListInd = 0
-for jj in range(len(listVertices)):
-    curJind = listVertices[jj]
-    for kk in adjList[jj]:
-        #inputFactor = np.matrix(np.ones((3,3))) ; # TEST CODE
-        inputFactor = np.matrix(np.ones((2, 2)))
-        #inputFactor = np.multiply(inputFactor,0.25)
-        gmFactors[curListInd].table = inputFactor
-        probFactors[curListInd].table = probXjk[curJind,kk,:,:]
-        curListInd += 1
+    #fills the table with probabilities
+    inputFactor = np.matrix(np.ones((2, 2)))
+    # inputFactor = np.multiply(inputFactor,0.25)
+    gmFactors[ee].table = inputFactor
+    probFactors[ee].table = probXjk[jj, kk, :, :]
 
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
-numIter=6
+numIter=2
 logLikeIter = np.zeros(numIter)
 for iterI in range(numIter):
     print 'Now computing Iteration: ',iterI
-    listInd = 0
-    for jj in range(len(listVertices)):
-        curJind = listVertices[jj]
-        for kk in adjList[jj]:
-            #print jj,kk
+    for ee in range(nEdges):
+        jj = int(edges[ee, 0])
+        kk = int(edges[ee, 1])
+        listInd = 0
+        #print jj,kk
 
-            #does variable elimination to get p_ij value
-            currentFactors = copy.deepcopy(gmFactors)
-            curModel = gm.GraphModel(currentFactors)
-            pri = [1.0 for Xi in currentFactors]
-            pri[curJind], pri[kk] = 2.0, 2.0
-            order = gm.eliminationOrder(curModel,orderMethod='minfill',priority=pri)[0]
-            curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
-            curP = curModel.joint()
-            curLnZ = np.log(curP.sum())
-            #print 'lnZ: ', curLnZ
-            curP /= curP.sum()
-            #print curP.table
+        #does variable elimination to get p_ij value
+        currentFactors = copy.deepcopy(gmFactors)
+        curModel = gm.GraphModel(currentFactors)
+        pri = [1.0 for Xi in currentFactors]
+        pri[jj], pri[kk] = 2.0, 2.0
+        order = gm.eliminationOrder(curModel,orderMethod='minfill',priority=pri)[0]
+        curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
+        curP = curModel.joint()
+        curLnZ = np.log(curP.sum())
+        #print 'lnZ: ', curLnZ
+        curP /= curP.sum()
+        #print curP.table
 
-            curLog = 0
-            probModel = gm.GraphModel(probFactors)
-            for ptNum in range(m):
-                curLog += probModel.logValue(D[ptNum,:])
-            curLog = curLog/m
-            #print 'logLike: ',curLog/m,'\n'
+        curLog = 0
+        probModel = gm.GraphModel(probFactors)
+        for ptNum in range(m):
+            curLog += probModel.logValue(D[ptNum,:])
+        curLog = curLog/m
+        #print 'logLike: ',curLog/m,'\n'
 
-            #update the factor
-            currentFij = gmFactors[listInd].table
-            probRatio = np.matrix(np.divide(probXjk[curJind,kk,:,:],curP.table))
-            newFij = np.multiply(currentFij,probRatio)
-            gmFactors[listInd].table = newFij
+        #update the factor
+        currentFij = gmFactors[ee].table
+        probRatio = np.matrix(np.divide(probXjk[jj,kk,:,:],curP.table))
+        newFij = np.multiply(currentFij,probRatio)
+        gmFactors[ee].table = newFij
 
-            newFijNorm = newFij/newFij.sum()
-            probFactors[listInd].table = newFijNorm
+        newFijNorm = newFij/newFij.sum()
+        probFactors[ee].table = newFijNorm
 
-            listInd+=1
     logLikeIter[iterI] = curLog
 
 plt.plot(logLikeIter)
