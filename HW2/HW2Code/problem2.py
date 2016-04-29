@@ -133,14 +133,15 @@ for ee in range(nEdges):
 
     #fills the table with probabilities
     inputFactor = np.matrix(np.ones((2, 2)))
-    # inputFactor = np.multiply(inputFactor,0.25)
+
+    inputFactor = np.multiply(inputFactor,0.25)
     gmFactors[ee].table = inputFactor
     probFactors[ee].table = probXjk[jj, kk, :, :]
 
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
-numIter=15
+numIter=100
 totalEnt = numIter*nEdges
 logLikeIter = np.zeros(numIter)
 logLikeAll = np.zeros(totalEnt)
@@ -151,15 +152,7 @@ for iterI in range(numIter):
         print 'Now processing edge: ',ee
         #print jj,kk
 
-        # computes the likelihood of the current probabilistic model
-        curLog = 0
-        probModel = gm.GraphModel(probFactors)
-        for ptNum in range(m):
-            curLog += probModel.logValue(D[ptNum, :])
-        curLog = -curLog / m
-        # print 'logLike: ',curLog,'\n'
-        logLikeAll[arrInd] = curLog
-        arrInd += 1
+
 
         #current edge
         jj = int(edges[ee, 0])
@@ -179,27 +172,30 @@ for iterI in range(numIter):
         #print curP.table
 
         #update the current f_jk value
-        currentFij = gmFactors[ee].table
-        probRatio = np.matrix(np.divide(probXjk[jj,kk,:,:],curP.table))
-        newFij = np.multiply(currentFij,probRatio)
+        #currentFij = gmFactors[ee].table
+        #probRatio = np.matrix(np.divide(probXjk[jj,kk,:,:],curP.table))
+        #newFij = np.multiply(currentFij,probRatio)
+        #gmFactors[ee].table = newFij
+
+        newFij = gmFactors[ee].table*probXjk[jj,kk,:,:]/curP.table
         gmFactors[ee].table = newFij
 
         #update the probabilistic model
-        newFijNorm = newFij/newFij.sum()
-        probFactors[ee].table = newFijNorm
+        #newFijNorm = newFij/newFij.sum()
+        #probFactors[ee].table = newFijNorm
 
+    # computes the likelihood of the current model
+    curLog = 0
+    probModel = gm.GraphModel(gmFactors)
+    for ptNum in range(m):
+        curLog += probModel.logValue(D[ptNum, :])
+    curLog = curLog / m
     logLikeIter[iterI] = curLog
 
 
-plt.plot(np.divide(range(totalEnt),nEdges),logLikeAll)
-plt.xlabel('Number of Complete Iterations Done')
-plt.ylabel('Negative Log Likelihood Of Model')
-plt.show()
-
 plt.plot(logLikeIter)
 plt.xlabel('Number of Complete Iterations Done')
-plt.ylabel('Negative Log Likelihood Of Model')
+plt.ylabel('Log Likelihood Of Model')
 plt.show()
 
-print logLikeAll
 print logLikeIter
