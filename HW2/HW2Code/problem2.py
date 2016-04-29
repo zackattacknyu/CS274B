@@ -141,7 +141,7 @@ for ee in range(nEdges):
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
-numIter=100
+numIter=15
 totalEnt = numIter*nEdges
 logLikeIter = np.zeros(numIter)
 logLikeAll = np.zeros(totalEnt)
