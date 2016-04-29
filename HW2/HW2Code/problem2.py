@@ -97,17 +97,22 @@ def getAdjList(adjMatrix):
     return listVertices,adjList
 
 listVertices,adjList = getAdjList(adjMatrix)
-# for i in range(len(listVertices)):
-#     print listVertices[i],adjList[i]
-#
-# for jj in range(len(listVertices)):
-#     curJind = listVertices[jj]
-#     for kk in adjList[jj]:
-#         print probXjGivenK[curJind,kk,:,:]
 
 #Part C
 
 #makes the variables
+
+#tests code on example in slides
+#Gave sample p12 and p13 result, so the var elim is working correctly
+# n=3
+# adjMatrix = np.ones((3,3))
+# listVertices,adjList = getAdjList(adjMatrix)
+# gmNodes = [gm.Var(i,3) for i in range(n)]
+# probNodes = [gm.Var(i,3) for i in range(n)]
+# probXjk = np.zeros((3,3,3,3))
+# probXjk[0,1,:,:] = [[0.249,0.002,0.311],[0.017,0.024,0.015],[0.029,0.348,0.000]]
+# probXjk[0,2,:,:] = [[0.136,0.118,0.309],[0.003,0.029,0.025],[0.0348,0.014,0.015]]
+
 gmNodes = [gm.Var(i,2) for i in range(n)]
 probNodes = [gm.Var(i,2) for i in range(n)]
 #print gmNodes
@@ -126,7 +131,8 @@ curListInd = 0
 for jj in range(len(listVertices)):
     curJind = listVertices[jj]
     for kk in adjList[jj]:
-        inputFactor = np.matrix(np.ones((2,2)))
+        #inputFactor = np.matrix(np.ones((3,3))) ; # TEST CODE
+        inputFactor = np.matrix(np.ones((2, 2)))
         #inputFactor = np.multiply(inputFactor,0.25)
         gmFactors[curListInd].table = inputFactor
         probFactors[curListInd].table = probXjk[curJind,kk,:,:]
@@ -135,7 +141,7 @@ for jj in range(len(listVertices)):
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
-numIter=5
+numIter=6
 logLikeIter = np.zeros(numIter)
 for iterI in range(numIter):
     print 'Now computing Iteration: ',iterI
@@ -143,18 +149,20 @@ for iterI in range(numIter):
     for jj in range(len(listVertices)):
         curJind = listVertices[jj]
         for kk in adjList[jj]:
+            #print jj,kk
 
             #does variable elimination to get p_ij value
             currentFactors = copy.deepcopy(gmFactors)
             curModel = gm.GraphModel(currentFactors)
             pri = [1.0 for Xi in currentFactors]
             pri[curJind], pri[kk] = 2.0, 2.0
-            order = gm.eliminationOrder(curModel,orderMethod='minwidth',priority=pri)[0]
+            order = gm.eliminationOrder(curModel,orderMethod='minfill',priority=pri)[0]
             curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
             curP = curModel.joint()
             curLnZ = np.log(curP.sum())
             #print 'lnZ: ', curLnZ
             curP /= curP.sum()
+            #print curP.table
 
             curLog = 0
             probModel = gm.GraphModel(probFactors)
