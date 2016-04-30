@@ -342,13 +342,11 @@ Here are the first 5 empirical marginal probabilities
 \end{lstlisting}
 \newpage
 \subsection*{Part C}
-To run IPF, I first initialized the model:
-
+Here is the code I used to run IPF:
 \begin{lstlisting}
 edges = np.genfromtxt('data/edges.txt')
 nEdges,cc = edges.shape
 
-#initializes the factors given the loopy model graph we have
 gmNodes = [gm.Var(i,2) for i in range(nEdges)]
 probNodes = [gm.Var(i,2) for i in range(nEdges)]
 gmFactors = []
@@ -358,13 +356,6 @@ for ee in range(nEdges):
     gmFactors.append(gm.Factor([gmNodes[jj], gmNodes[kk]], 1.0))
     inputFactor = np.matrix(np.ones((2, 2)))
     gmFactors[ee].table = inputFactor
-\end{lstlisting}
-
-\newpage 
-
-After initialization, this is the code I used to run IPF:
-
-\begin{lstlisting}
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
@@ -388,7 +379,6 @@ for iterI in range(numIter):
         newFij = gmFactors[ee].table*probXjk[jj,kk,:,:]/curP.table
         gmFactors[ee].table = newFij
 
-    # computes the likelihood of the current model
     curLog = 0
     probModel = gm.GraphModel(gmFactors)
     for ptNum in range(m):
