@@ -342,8 +342,6 @@ Here are the first 5 empirical marginal probabilities
 \end{lstlisting}
 \newpage
 \subsection*{Part C}
-
-The log partition function stayed constant with a value of $20.7944154168$. \\
 To run IPF, I first initialized the model:
 
 \begin{lstlisting}
@@ -354,20 +352,15 @@ nEdges,cc = edges.shape
 gmNodes = [gm.Var(i,2) for i in range(nEdges)]
 probNodes = [gm.Var(i,2) for i in range(nEdges)]
 gmFactors = []
-probFactors = []
 for ee in range(nEdges):
     jj = int(edges[ee,0])
     kk = int(edges[ee,1])
     gmFactors.append(gm.Factor([gmNodes[jj], gmNodes[kk]], 1.0))
-    probFactors.append(gm.Factor([probNodes[jj], probNodes[kk]], 1.0))
-
-    #fills the table with probabilities
     inputFactor = np.matrix(np.ones((2, 2)))
     gmFactors[ee].table = inputFactor
-    probFactors[ee].table = probXjk[jj, kk, :, :]
 \end{lstlisting}
 
-\newpage
+\newpage 
 
 After initialization, this is the code I used to run IPF:
 
@@ -376,27 +369,12 @@ After initialization, this is the code I used to run IPF:
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
 
 numIter=15
-totalEnt = numIter*nEdges
 logLikeIter = np.zeros(numIter)
-logLikeAll = np.zeros(totalEnt)
-arrInd = 0
 for iterI in range(numIter):
-    print 'Now computing Iteration: ',iterI
     for ee in range(nEdges):
-        # computes the likelihood of the current probabilistic model
-        curLog = 0
-        probModel = gm.GraphModel(probFactors)
-        for ptNum in range(m):
-            curLog += probModel.logValue(D[ptNum, :])
-        curLog = -curLog / m
-        logLikeAll[arrInd] = curLog
-        arrInd += 1
-
-        #current edge
         jj = int(edges[ee, 0])
         kk = int(edges[ee, 1])
 
-        #does variable elimination to get p_jk value
         currentFactors = copy.deepcopy(gmFactors)
         curModel = gm.GraphModel(currentFactors)
         pri = [1.0 for Xi in currentFactors]
@@ -405,32 +383,58 @@ for iterI in range(numIter):
         curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
         curP = curModel.joint()
         curLnZ = np.log(curP.sum())
-        print 'lnZ: ', curLnZ
         curP /= curP.sum()
 
-        #update the current f_jk value
-        currentFij = gmFactors[ee].table
-        probRatio = np.matrix(np.divide(probXjk[jj,kk,:,:],curP.table))
-        newFij = np.multiply(currentFij,probRatio)
+        newFij = gmFactors[ee].table*probXjk[jj,kk,:,:]/curP.table
         gmFactors[ee].table = newFij
 
-        #update the probabilistic model
-        newFijNorm = newFij/newFij.sum()
-        probFactors[ee].table = newFijNorm
-
+    # computes the likelihood of the current model
+    curLog = 0
+    probModel = gm.GraphModel(gmFactors)
+    for ptNum in range(m):
+        curLog += probModel.logValue(D[ptNum, :])#-curLnZ
+    curLog = curLog / m - curLnZ
     logLikeIter[iterI] = curLog
+    print 'lnZ: ', curLnZ
 
+plt.plot(range(1,numIter+1),logLikeIter)
+plt.xlabel('Number of Completed Iterations')
+plt.ylabel('Log Likelihood Of Model')
+plt.show()
+
+print logLikeIter
 \end{lstlisting}
 \newpage
 
-Here is the negative log-likelihood after each iteration (starting from 0):
+Here is the graph of log likelihood vs iteration number:
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=6in]{prob2cPlot2.png}
-\caption{Neg LL after running IPF}
+\caption{Log likelihood after running IPF}
 \end{figure}
 
-It finally converged to a value of $57.91773114$
+The log partition function stayed constant with the following value:\\
+$20.7944154168$\\
+\\
+These were the printed log likelihood values: \\
+\begin{lstlisting}
+-10.52755241
+-9.76622834
+-9.70930548
+-9.69557976
+-9.69224636
+-9.6915535
+-9.69141484
+-9.69138601
+-9.69137972
+-9.6913783
+-9.69137794
+-9.69137784
+-9.69137781
+-9.6913778
+-9.6913778
+\end{lstlisting}
+Thus it converged to a value of $-9.6913778$
 
 \end{document}

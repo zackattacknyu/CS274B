@@ -147,7 +147,7 @@ logLikeIter = np.zeros(numIter)
 logLikeAll = np.zeros(totalEnt)
 arrInd = 0
 for iterI in range(numIter):
-    print 'Now computing Iteration: ',iterI
+    #print 'Now computing Iteration: ',iterI
     for ee in range(nEdges):
         #print 'Now processing edge: ',ee
         #print jj,kk
@@ -190,12 +190,12 @@ for iterI in range(numIter):
         curLog += probModel.logValue(D[ptNum, :])#-curLnZ
     curLog = curLog / m - curLnZ
     logLikeIter[iterI] = curLog
-    print 'logLike: ',curLog
-    print 'lnZ: ', curLnZ
+    #print 'logLike: ',curLog
+    #print 'lnZ: ', curLnZ
 
 
-plt.plot(logLikeIter)
-plt.xlabel('Number of Complete Iterations Done')
+plt.plot(range(1,numIter+1),logLikeIter)
+plt.xlabel('Number of Completed Iterations')
 plt.ylabel('Log Likelihood Of Model')
 plt.show()
 
