@@ -124,19 +124,19 @@ listVertices,adjList = getAdjList(adjMatrix)
 gmNodes = [gm.Var(i,2) for i in range(nEdges)]
 probNodes = [gm.Var(i,2) for i in range(nEdges)]
 gmFactors = []
-probFactors = []
+#probFactors = []
 for ee in range(nEdges):
     jj = int(edges[ee,0])
     kk = int(edges[ee,1])
     gmFactors.append(gm.Factor([gmNodes[jj], gmNodes[kk]], 1.0))
-    probFactors.append(gm.Factor([probNodes[jj], probNodes[kk]], 1.0))
+    #probFactors.append(gm.Factor([probNodes[jj], probNodes[kk]], 1.0))
 
     #fills the table with probabilities
     inputFactor = np.matrix(np.ones((2, 2)))
 
-    inputFactor = np.multiply(inputFactor,0.25)
+    #inputFactor = np.multiply(inputFactor,0.25)
     gmFactors[ee].table = inputFactor
-    probFactors[ee].table = probXjk[jj, kk, :, :]
+    #probFactors[ee].table = probXjk[jj, kk, :, :]
 
 
 sumElim = lambda F,Xlist: F.sum(Xlist)   # helper function for eliminate
@@ -149,7 +149,7 @@ arrInd = 0
 for iterI in range(numIter):
     print 'Now computing Iteration: ',iterI
     for ee in range(nEdges):
-        print 'Now processing edge: ',ee
+        #print 'Now processing edge: ',ee
         #print jj,kk
 
 
@@ -167,7 +167,6 @@ for iterI in range(numIter):
         curModel.eliminate(order[:-2], sumElim)  # eliminate all but last two
         curP = curModel.joint()
         curLnZ = np.log(curP.sum())
-        #print 'lnZ: ', curLnZ
         curP /= curP.sum()
         #print curP.table
 
@@ -188,9 +187,11 @@ for iterI in range(numIter):
     curLog = 0
     probModel = gm.GraphModel(gmFactors)
     for ptNum in range(m):
-        curLog += probModel.logValue(D[ptNum, :])-curLnZ
-    curLog = curLog / m
+        curLog += probModel.logValue(D[ptNum, :])#-curLnZ
+    curLog = curLog / m - curLnZ
     logLikeIter[iterI] = curLog
+    print 'logLike: ',curLog
+    print 'lnZ: ', curLnZ
 
 
 plt.plot(logLikeIter)
