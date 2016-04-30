@@ -188,7 +188,7 @@ for iterI in range(numIter):
     curLog = 0
     probModel = gm.GraphModel(gmFactors)
     for ptNum in range(m):
-        curLog += probModel.logValue(D[ptNum, :])
+        curLog += probModel.logValue(D[ptNum, :])-curLnZ
     curLog = curLog / m
     logLikeIter[iterI] = curLog
 
