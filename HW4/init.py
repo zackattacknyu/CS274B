@@ -1,6 +1,7 @@
 from os import walk
 import pyGM as gm
 import numpy as np
+import pyGM.wmb
 #import matplotlib.pyplot as plt
 #import networkx as nx
 
@@ -46,31 +47,56 @@ for iter in range(num_iter):
         #Define random variables for the inference process:
         Y = [gm.Var(i,10) for i in range(ns)]
 
-        curTh = np.matrix(ThetaF[0])
-        curX = np.matrix(xs[s][0])
-        newMat = np.multiply(curTh,curX)
-        print newMat.shape
-        #factors = [gm.Factor(Y[0],ThetaF[ff].dot(xs[s][ff])) for ff in range(5)]
+        factors = []
+        for ii in range(ns):
+            curTable = np.matrix(np.zeros((10,1)))
+
+            for ff in range(len(feature_sizes)):
+                curTh = np.matrix(ThetaF[ff])
+                curX = xs[ii][ff]
+                curMat = np.matrix(curTh[:,curX])
+                curTable = np.add(curTable,curMat)
+
+            if ii<(ns-1):
+                curMat = np.matrix(ThetaP[:,ys[ii+1]])
+                curMat = np.reshape(curMat,(10,1))
+                curTable = np.add(curTable,curMat)
+
+            factors.append(gm.Factor([Y[ii]]))
+            factors[ii].table = np.matrix(np.exp(curTable))
+
+        model_pred = gm.GraphModel(factors)
+
+        # Copy factors and add extra Hamming factors for loss-augmented model
+        factors_aug = [ f for f in factors ]
+        factors_aug.extend( [gm.Factor([Y[i]], Loss[:,ys[i]]).exp() for i in range(ns)] )
+        model_aug = gm.GraphModel(factors_aug)
+
+        order = range(ns) # eliminate in sequence (Markov chain on y)
+        wt = 1e-4 # for max elimination in JTree implementation
+
+        # Now, the most likely configuration of the prediction model (for prediction) is:
+        yhat_pred = gm.wmb.JTree(model_pred,order,wt).argmax()
+        #print yhat_pred
+
+        # and the maximizing argument of the loss (for computing the gradient) is
+        yhat_aug = gm.wmb.JTree(model_aug,order,wt).argmax()
+        #print yhat_aug
 
 
-#ns = len(ys)
 
-# Build "prediction model" using your parameters
-#factors = [ ...
-# don't forget pyGM expects models to be products of factors,
-# so exponentiate the factors before making a model...
-#model_pred = gm.GraphModel(factors);
-# Copy factors and add extra Hamming factors for loss-augmented model
-#factors_aug = [ f for f in factors ]
-#factors_aug.extend( [gm.Factor([Y[i]], Loss[:,ys[i]]).exp() for i in range(n)] );
-#model_aug = gm.GraphModel(factors_aug);
-#order = range(n); # eliminate in sequence (Markov chain on y)
-#wt = 1e-4; # for max elimination in JTree implementation
-# Now, the most likely configuration of the prediction model (for prediction) is:
-#yhat_pred = gm.wmb.JTree(model_pred,order,wt).argmax();
-# and the maximizing argument of the loss (for computing the gradient) is
-#yhat_aug = gm.wmb.JTree(model_aug,order,wt).argmax();
-# use yhat_pred & ys to keep a running estimate of your prediction accuracy & print it
-#... # how often etc is up to you
-# use yhat_aug & ys to update your parameters theta in the negative gradient direction
-#...
+        # use yhat_pred & ys to keep a running estimate of your prediction accuracy & print it
+        #... # how often etc is up to you
+        print ns
+        acc = 0
+        yhatVals = yhat_pred.values()
+        for kk in range(ns):
+            if(ys[kk]-yhatVals[kk] < 1):
+                acc += 1
+        acc = np.divide(np.double(acc),np.double(ns))
+        print acc
+        print '----------'
+
+
+        # use yhat_aug & ys to update your parameters theta in the negative gradient direction
+        #...
