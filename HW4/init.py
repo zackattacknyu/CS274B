@@ -83,11 +83,8 @@ for iter in range(num_iter):
         yhat_aug = gm.wmb.JTree(model_aug,order,wt).argmax()
         #print yhat_aug
 
-
-
         # use yhat_pred & ys to keep a running estimate of your prediction accuracy & print it
         #... # how often etc is up to you
-        print ns
         acc = 0
         yhatVals = yhat_pred.values()
         for kk in range(ns):
