@@ -27,7 +27,7 @@ print len(ThetaP)
 
 print Loss[:,1]
 
-num_iter = 1
+num_iter = 10
 
 
 # step size, etc.
@@ -81,7 +81,8 @@ for iter in range(num_iter):
 
         # and the maximizing argument of the loss (for computing the gradient) is
         yhat_aug = gm.wmb.JTree(model_aug,order,wt).argmax()
-        #print yhat_aug
+        yhatAugVals = yhat_aug.values()
+        #print yhat_aug.values()
 
         # use yhat_pred & ys to keep a running estimate of your prediction accuracy & print it
         #... # how often etc is up to you
@@ -94,6 +95,17 @@ for iter in range(num_iter):
         print acc
         print '----------'
 
-
+        stepSize = 0.2;
         # use yhat_aug & ys to update your parameters theta in the negative gradient direction
-        #...
+        for ii in range(ns):
+            curY = yhatAugVals[ii]
+            curYs = ys[ii]
+            for ff in range(len(feature_sizes)):
+                curTh = np.matrix(ThetaF[ff])
+                curX = xs[ii][ff]
+                curGrad = curTh[curY,curX]-curTh[curYs,curX]
+                curTh[curY,curX] =curTh[curY,curX] - stepSize*curGrad
+                ThetaF[ff] = curTh
+            if ii < (ns - 1):
+                curGradP = ThetaP[curY,ys[ii + 1]]-ThetaP[curYs,ys[ii + 1]]
+                ThetaP[curY, ys[ii + 1]] = ThetaP[curY,ys[ii + 1]] - stepSize*curGradP
