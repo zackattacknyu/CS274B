@@ -34,6 +34,7 @@ num_iter = 20
 for iter in range(num_iter):
     #for s in np.random.permutation(len(files)):
     for s in range(5):
+        print 'iter:' + str(iter) + ' s:' + str(s)
         # Load data ys,xs
         fh = open(datapath + files[s], 'r')
         rawlines = fh.readlines()
@@ -48,9 +49,10 @@ for iter in range(num_iter):
         Y = [gm.Var(i,10) for i in range(ns)]
 
         factors = []
+        epsilon = 1e-9
         for ii in range(ns):
             curTable = np.matrix(np.zeros((10,1)))
-
+            #curTable = curTable + epsilon
             for ff in range(len(feature_sizes)):
                 curTh = np.matrix(ThetaF[ff])
                 curX = xs[ii][ff]
@@ -116,16 +118,17 @@ for iter in range(num_iter):
             hingeLoss += lambdaVal*(ThetaFnorms[ff]*ThetaFnorms[ff])
 
         hingeLoss += lambdaVal*(ThetaPnorm*ThetaPnorm)
-        #print np.divide(np.double(hingeLoss),np.double(ns))
+        print np.divide(np.double(hingeLoss),np.double(ns))
 
-        stepSize = 0.1
+        stepSize = 0.01
         # use yhat_aug & ys to update your parameters theta in the negative gradient direction
         ThetaPgrad = np.zeros((10, 10))
         for ii in range(ns-1):
             ThetaPgrad[yhatAugVals[ii], yhatAugVals[ii + 1]] += 1
             ThetaPgrad[ys[ii],ys[ii+1]] -= 1
         ThetaP = ThetaP - ThetaPgrad * stepSize
-        ThetaP = ThetaP + 2*lambdaVal*ThetaPnorm
+        #ThetaP = ThetaP - 2*lambdaVal*ThetaPnorm
+        ThetaP = ThetaP -  stepSize*lambdaVal * ThetaP
         #print ThetaP
 
         ThetaFgrad = [np.zeros((10, feature_sizes[f])) for f in range(numFeats)]
@@ -135,4 +138,5 @@ for iter in range(num_iter):
                 ThetaFgrad[ff][ys[ii], xs[ii][ff]] -= 1
         for ff in range(numFeats):
             ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
-            ThetaF[ff] = ThetaF[ff] + 2*lambdaVal*ThetaFnorms[ff]
+            #ThetaF[ff] = ThetaF[ff] - 2*lambdaVal*ThetaFnorms[ff]
+            ThetaF[ff] = ThetaF[ff] -  stepSize*lambdaVal * ThetaF[ff]
