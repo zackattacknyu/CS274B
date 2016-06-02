@@ -93,17 +93,31 @@ for iter in range(num_iter):
                 hammingLoss += 1
         print float(hammingLoss)/float(ns)
 
-        ThetaPnorms = np.zeros((10,10))
-        ThetaFnorms = [np.zeros((10, feature_sizes[f])) for f in range(numFeats)]
-        for ii in range(10):
-            ThetaPnorms[:,ii] = np.linalg.norm(ThetaP[:,ii])
-
-        for ff in range(numFeats):
-            for jj in range(feature_sizes[ff]):
-                ThetaFnorms[ff][:,jj] = np.linalg.norm(ThetaF[ff][:,jj])
-
-
         lambdaVal = 0.01
+
+        #calculate hinge loss factors
+        hingeLoss = 0
+        hingeLoss += hammingLoss
+        for ii in range(ns):
+            for ff in range(len(feature_sizes)):
+                curTh = np.matrix(ThetaF[ff])
+                curX = xs[ii][ff]
+                diffFactor = curTh[yhatAugVals[ii],curX]-curTh[ys[ii],curX]
+                hingeLoss += diffFactor
+
+            if ii < (ns - 1):
+                otherDiff = ThetaP[yhatAugVals[ii], ys[ii + 1]]-ThetaP[ys[ii], ys[ii + 1]]
+                hingeLoss += otherDiff
+
+        ThetaFnorms = np.zeros(numFeats)
+        ThetaPnorm = np.linalg.norm(ThetaP)
+        for ff in range(numFeats):
+            ThetaFnorms[ff] = np.linalg.norm(ThetaF[ff])
+            hingeLoss += lambdaVal*(ThetaFnorms[ff]*ThetaFnorms[ff])
+
+        hingeLoss += lambdaVal*(ThetaPnorm*ThetaPnorm)
+        #print np.divide(np.double(hingeLoss),np.double(ns))
+
         stepSize = 0.1
         # use yhat_aug & ys to update your parameters theta in the negative gradient direction
         ThetaPgrad = np.zeros((10, 10))
@@ -111,7 +125,7 @@ for iter in range(num_iter):
             ThetaPgrad[yhatAugVals[ii], yhatAugVals[ii + 1]] += 1
             ThetaPgrad[ys[ii],ys[ii+1]] -= 1
         ThetaP = ThetaP - ThetaPgrad * stepSize
-        ThetaP = ThetaP + 2*lambdaVal*ThetaPnorms
+        ThetaP = ThetaP + 2*lambdaVal*ThetaPnorm
         #print ThetaP
 
         ThetaFgrad = [np.zeros((10, feature_sizes[f])) for f in range(numFeats)]
@@ -122,17 +136,3 @@ for iter in range(num_iter):
         for ff in range(numFeats):
             ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
             ThetaF[ff] = ThetaF[ff] + 2*lambdaVal*ThetaFnorms[ff]
-            #print ThetaF[ff]
-
-        #for ii in range(ns):
-        #    curY = yhatAugVals[ii]
-        #    curYs = ys[ii]
-        #    for ff in range(len(feature_sizes)):
-        #        curTh = np.matrix(ThetaF[ff])
-        #        curX = xs[ii][ff]
-        #        curGrad = curTh[curY,curX]-curTh[curYs,curX]
-        #        curTh[curY,curX] =curTh[curY,curX] - stepSize*curGrad
-        #        ThetaF[ff] = curTh
-        #    if ii < (ns - 1):
-        #        curGradP = ThetaP[curY,ys[ii + 1]]-ThetaP[curYs,ys[ii + 1]]
-        #        ThetaP[curY, ys[ii + 1]] = ThetaP[curY,ys[ii + 1]] - stepSize*curGradP
