@@ -18,7 +18,8 @@ xs = [[int(l[2])-1,int(l[3]),int(l[4]),int(l[5])-1,int(l[6])-1] for l in lines]
 
 
 feature_sizes = [1,2,2,201,201]
-ThetaF = [.001*np.random.rand(10,feature_sizes[f]) for f in range(len(feature_sizes))]
+numFeats = len(feature_sizes)
+ThetaF = [.001*np.random.rand(10,feature_sizes[f]) for f in range(numFeats)]
 ThetaP = .001*np.random.rand(10,10)
 Loss = 1.0 - np.eye(10) # hamming loss
 
@@ -97,15 +98,29 @@ for iter in range(num_iter):
 
         stepSize = 0.2;
         # use yhat_aug & ys to update your parameters theta in the negative gradient direction
+        ThetaPgrad = np.zeros((10, 10))
+        for ii in range(ns-1):
+            ThetaPgrad[yhatAugVals[ii], yhatAugVals[ii + 1]] += 1
+        ThetaP = ThetaP - ThetaPgrad * stepSize
+        #print ThetaP
+
+        ThetaFgrad = [np.zeros((10, feature_sizes[f])) for f in range(numFeats)]
         for ii in range(ns):
-            curY = yhatAugVals[ii]
-            curYs = ys[ii]
-            for ff in range(len(feature_sizes)):
-                curTh = np.matrix(ThetaF[ff])
-                curX = xs[ii][ff]
-                curGrad = curTh[curY,curX]-curTh[curYs,curX]
-                curTh[curY,curX] =curTh[curY,curX] - stepSize*curGrad
-                ThetaF[ff] = curTh
-            if ii < (ns - 1):
-                curGradP = ThetaP[curY,ys[ii + 1]]-ThetaP[curYs,ys[ii + 1]]
-                ThetaP[curY, ys[ii + 1]] = ThetaP[curY,ys[ii + 1]] - stepSize*curGradP
+            for ff in range(numFeats):
+                ThetaFgrad[ff][yhatAugVals[ii],xs[ii][ff]] += 1
+        for ff in range(numFeats):
+            ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
+            #print ThetaF[ff]
+
+        #for ii in range(ns):
+        #    curY = yhatAugVals[ii]
+        #    curYs = ys[ii]
+        #    for ff in range(len(feature_sizes)):
+        #        curTh = np.matrix(ThetaF[ff])
+        #        curX = xs[ii][ff]
+        #        curGrad = curTh[curY,curX]-curTh[curYs,curX]
+        #        curTh[curY,curX] =curTh[curY,curX] - stepSize*curGrad
+        #        ThetaF[ff] = curTh
+        #    if ii < (ns - 1):
+        #        curGradP = ThetaP[curY,ys[ii + 1]]-ThetaP[curYs,ys[ii + 1]]
+        #        ThetaP[curY, ys[ii + 1]] = ThetaP[curY,ys[ii + 1]] - stepSize*curGradP
