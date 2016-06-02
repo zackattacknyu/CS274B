@@ -96,11 +96,12 @@ for iter in range(num_iter):
         print acc
         print '----------'
 
-        stepSize = 0.2;
+        stepSize = 0.1
         # use yhat_aug & ys to update your parameters theta in the negative gradient direction
         ThetaPgrad = np.zeros((10, 10))
         for ii in range(ns-1):
             ThetaPgrad[yhatAugVals[ii], yhatAugVals[ii + 1]] += 1
+            ThetaPgrad[ys[ii],ys[ii+1]] -= 1
         ThetaP = ThetaP - ThetaPgrad * stepSize
         #print ThetaP
 
@@ -108,6 +109,7 @@ for iter in range(num_iter):
         for ii in range(ns):
             for ff in range(numFeats):
                 ThetaFgrad[ff][yhatAugVals[ii],xs[ii][ff]] += 1
+                ThetaFgrad[ff][ys[ii], xs[ii][ff]] -= 1
         for ff in range(numFeats):
             ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
             #print ThetaF[ff]
