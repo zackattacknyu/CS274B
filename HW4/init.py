@@ -1,6 +1,7 @@
 from os import walk
 import pyGM as gm
 import numpy as np
+import numpy.matlib
 import pyGM.wmb
 #import matplotlib.pyplot as plt
 #import networkx as nx
@@ -26,9 +27,7 @@ Loss = 1.0 - np.eye(10) # hamming loss
 print len(ThetaF)
 print len(ThetaP)
 
-print Loss[:,1]
-
-num_iter = 10
+num_iter = 20
 
 
 # step size, etc.
@@ -87,15 +86,24 @@ for iter in range(num_iter):
 
         # use yhat_pred & ys to keep a running estimate of your prediction accuracy & print it
         #... # how often etc is up to you
-        acc = 0
         yhatVals = yhat_pred.values()
-        for kk in range(ns):
-            if(ys[kk]-yhatVals[kk] < 1):
-                acc += 1
-        acc = np.divide(np.double(acc),np.double(ns))
-        print acc
-        print '----------'
+        hammingLoss = 0
+        for ii in range(ns):
+            if(abs(yhatVals[ii]-ys[ii])>=1):
+                hammingLoss += 1
+        print float(hammingLoss)/float(ns)
 
+        ThetaPnorms = np.zeros((10,10))
+        ThetaFnorms = [np.zeros((10, feature_sizes[f])) for f in range(numFeats)]
+        for ii in range(10):
+            ThetaPnorms[:,ii] = np.linalg.norm(ThetaP[:,ii])
+
+        for ff in range(numFeats):
+            for jj in range(feature_sizes[ff]):
+                ThetaFnorms[ff][:,jj] = np.linalg.norm(ThetaF[ff][:,jj])
+
+
+        lambdaVal = 0.01
         stepSize = 0.1
         # use yhat_aug & ys to update your parameters theta in the negative gradient direction
         ThetaPgrad = np.zeros((10, 10))
@@ -103,6 +111,7 @@ for iter in range(num_iter):
             ThetaPgrad[yhatAugVals[ii], yhatAugVals[ii + 1]] += 1
             ThetaPgrad[ys[ii],ys[ii+1]] -= 1
         ThetaP = ThetaP - ThetaPgrad * stepSize
+        ThetaP = ThetaP + 2*lambdaVal*ThetaPnorms
         #print ThetaP
 
         ThetaFgrad = [np.zeros((10, feature_sizes[f])) for f in range(numFeats)]
@@ -112,6 +121,7 @@ for iter in range(num_iter):
                 ThetaFgrad[ff][ys[ii], xs[ii][ff]] -= 1
         for ff in range(numFeats):
             ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
+            ThetaF[ff] = ThetaF[ff] + 2*lambdaVal*ThetaFnorms[ff]
             #print ThetaF[ff]
 
         #for ii in range(ns):
