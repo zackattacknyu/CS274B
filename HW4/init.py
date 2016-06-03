@@ -26,22 +26,28 @@ Loss = 1.0 - np.eye(10) # hamming loss
 
 print len(files)
 
-num_iter = 10
+num_iter = 2
 num_points_per_iter = len(files)
-#num_points_per_iter = 200
-stepSize = 0.02
+#num_points_per_iter = 100
+stepSize = 0.01
 lambdaVal = 0.01
 
 totalPts = num_iter*num_points_per_iter
 hammingLossValues = np.zeros(totalPts)
+hammingLossAfterIter = np.zeros(num_iter)
 hingeLossValues = np.zeros(totalPts)
+hingeLossAfterIter = np.zeros(num_iter)
 index = 0
+perSymHingeLoss = 0
+perSymHammingLoss = 0
 
 # step size, etc.
 for iter in range(num_iter):
     #for s in np.random.permutation(len(files)):
     print 'iter:' + str(iter)
-    for s in range(num_points_per_iter):
+    randomInds = np.random.permutation(len(files))
+    randomIndsUse = randomInds[0:num_points_per_iter]
+    for s in  randomIndsUse:
         #print 'iter:' + str(iter) + ' s:' + str(s)
         # Load data ys,xs
         fh = open(datapath + files[s], 'r')
@@ -72,8 +78,9 @@ for iter in range(num_iter):
                 curMat = np.reshape(curMat,(10,1))
                 curTable = np.add(curTable,curMat)
 
-            factors.append(gm.Factor([Y[ii]]))
-            factors[ii].table = np.matrix(np.exp(curTable))
+            #factors.append(gm.Factor([Y[ii]]))
+            factors.append(gm.Factor([Y[ii]],curTable).exp())
+            #factors[ii].table = np.matrix(np.exp(curTable))
 
         model_pred = gm.GraphModel(factors)
 
@@ -98,9 +105,13 @@ for iter in range(num_iter):
         #... # how often etc is up to you
         yhatVals = yhat_pred.values()
         hammingLoss = 0
+        accuracy = 0
         for ii in range(ns):
             if(abs(yhatVals[ii]-ys[ii])>=1):
                 hammingLoss += 1
+            else:
+                accuracy +=1
+        print np.divide(np.double(accuracy),np.double(ns))
         #print float(hammingLoss)/float(ns)
 
 
@@ -155,15 +166,19 @@ for iter in range(num_iter):
             #ThetaF[ff] = ThetaF[ff] - 2*lambdaVal*ThetaFnorms[ff]
             ThetaF[ff] = ThetaF[ff] - stepSize*lambdaVal * ThetaF[ff]
 
-        hingeLossValues[index] = np.divide(np.double(hingeLoss),np.double(ns))
-        hammingLossValues[index] = np.divide(np.double(hammingLoss), np.double(ns))
-        if s%10 == 0:
-            print 's:' + str(s)
-            print hingeLossValues[index]
-            print hammingLossValues[index]
+        perSymHingeLoss = np.divide(np.double(hingeLoss),np.double(ns))
+        perSymHammingLoss = np.divide(np.double(hammingLoss), np.double(ns))
+        hingeLossValues[index] = perSymHingeLoss
+        hammingLossValues[index] = perSymHammingLoss
+        #if s%10 == 0:
+            #print 's:' + str(s)
+            #print hingeLossValues[index]
+            #print hammingLossValues[index]
         index += 1
+    hingeLossAfterIter[iter] = perSymHingeLoss
+    hammingLossAfterIter[iter] = perSymHammingLoss
 
-
+#per iteration losses
 plt.hold(True)
 plt.plot(hingeLossValues,label='Per Symbol Hinge Loss')
 plt.plot(hammingLossValues,label='Per Symbol Hamming Loss')
@@ -180,6 +195,27 @@ plt.show()
 
 plt.plot(hammingLossValues,label='Per Symbol Hamming Loss')
 plt.xlabel('Number of Points Processed')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+#per full pass losses
+plt.hold(True)
+plt.plot(hingeLossAfterIter,label='Per Symbol Hinge Loss')
+plt.plot(hammingLossAfterIter,label='Per Symbol Hamming Loss')
+plt.xlabel('Number of Full Passes through data')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+plt.plot(hingeLossAfterIter,label='Per Symbol Hinge Loss')
+plt.xlabel('Number of Full Passes through data')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+plt.plot(hammingLossAfterIter,label='Per Symbol Hamming Loss')
+plt.xlabel('Number of Full Passes through data')
 plt.ylabel('Loss')
 plt.legend()
 plt.show()
