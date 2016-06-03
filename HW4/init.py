@@ -27,14 +27,15 @@ Loss = 1.0 - np.eye(10) # hamming loss
 print len(ThetaF)
 print len(ThetaP)
 
-num_iter = 20
+num_iter = 50
 
 
 # step size, etc.
 for iter in range(num_iter):
     #for s in np.random.permutation(len(files)):
+    print 'iter:' + str(iter)
     for s in range(5):
-        print 'iter:' + str(iter) + ' s:' + str(s)
+        #print 'iter:' + str(iter) + ' s:' + str(s)
         # Load data ys,xs
         fh = open(datapath + files[s], 'r')
         rawlines = fh.readlines()
@@ -134,7 +135,7 @@ for iter in range(num_iter):
             ThetaPgrad[ys[ii],ys[ii+1]] -= 1
         ThetaP = ThetaP - ThetaPgrad * stepSize
         #ThetaP = ThetaP - 2*lambdaVal*ThetaPnorm
-        ThetaP = ThetaP -  stepSize*lambdaVal * ThetaP
+        ThetaP = ThetaP - stepSize*lambdaVal * ThetaP
         #print ThetaP
 
         ThetaFgrad = [np.zeros((10, feature_sizes[f])) for f in range(numFeats)]
@@ -145,4 +146,4 @@ for iter in range(num_iter):
         for ff in range(numFeats):
             ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
             #ThetaF[ff] = ThetaF[ff] - 2*lambdaVal*ThetaFnorms[ff]
-            ThetaF[ff] = ThetaF[ff] -  stepSize*lambdaVal * ThetaF[ff]
+            ThetaF[ff] = ThetaF[ff] - stepSize*lambdaVal * ThetaF[ff]
