@@ -110,14 +110,20 @@ for iter in range(num_iter):
             if ii < (ns - 1):
                 otherDiff = ThetaP[yhatAugVals[ii], ys[ii + 1]]-ThetaP[ys[ii], ys[ii + 1]]
                 hingeLoss += otherDiff
+        for ii in range(10):
+            for jj in range(10):
+                hingeLoss += lambdaVal*ThetaP[ii,jj]**2
 
         ThetaFnorms = np.zeros(numFeats)
         ThetaPnorm = np.linalg.norm(ThetaP)
         for ff in range(numFeats):
+            for ii in range(10):
+                for jj in range(feature_sizes[ff]):
+                    hingeLoss += lambdaVal*(ThetaF[ff][ii,jj]**2)
             ThetaFnorms[ff] = np.linalg.norm(ThetaF[ff])
-            hingeLoss += lambdaVal*(ThetaFnorms[ff]*ThetaFnorms[ff])
+            #hingeLoss += lambdaVal*(ThetaFnorms[ff]*ThetaFnorms[ff])
 
-        hingeLoss += lambdaVal*(ThetaPnorm*ThetaPnorm)
+        #hingeLoss += lambdaVal*(ThetaPnorm*ThetaPnorm)
         print np.divide(np.double(hingeLoss),np.double(ns))
 
         stepSize = 0.01
