@@ -115,7 +115,7 @@ for iter in range(num_iter):
                 hingeLoss += otherDiff
         for ii in range(10):
             for jj in range(10):
-                hingeLoss += lambdaVal*ThetaP[ii,jj]**2
+                hingeLoss += lambdaVal*(ThetaP[ii,jj]**2)
 
         ThetaFnorms = np.zeros(numFeats)
         ThetaPnorm = np.linalg.norm(ThetaP)
@@ -150,21 +150,19 @@ for iter in range(num_iter):
             #ThetaF[ff] = ThetaF[ff] - 2*lambdaVal*ThetaFnorms[ff]
             ThetaF[ff] = ThetaF[ff] - stepSize*lambdaVal * ThetaF[ff]
 
-        hingeLossValues[index] = np.divide(np.double(hammingLoss),np.double(ns))
-        hammingLossValues[index] = np.divide(np.double(hingeLoss), np.double(ns))
+        hingeLossValues[index] = np.divide(np.double(hingeLoss),np.double(ns))
+        hammingLossValues[index] = np.divide(np.double(hammingLoss), np.double(ns))
         if s%10 == 0:
             print 's:' + str(s)
             print hingeLossValues[index]
             print hammingLossValues[index]
         index += 1
 
-plt.plot(hingeLossValues)
-plt.xlabel('Number of Points Processed')
-plt.ylabel('Hinge Loss')
-plt.show()
 
-
-plt.plot(hammingLossValues)
+plt.hold(True)
+plt.plot(hingeLossValues,label='Per Symbol Hinge Loss')
+plt.plot(hammingLossValues,label='Per Symbol Hamming Loss')
 plt.xlabel('Number of Points Processed')
-plt.ylabel('Hamming Loss')
+plt.ylabel('Loss')
+plt.legend()
 plt.show()
