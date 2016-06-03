@@ -3,7 +3,7 @@ import pyGM as gm
 import numpy as np
 import numpy.matlib
 import pyGM.wmb
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 #import networkx as nx
 
 datapath = 'data/'
@@ -24,17 +24,19 @@ ThetaF = [.001*np.random.rand(10,feature_sizes[f]) for f in range(numFeats)]
 ThetaP = .001*np.random.rand(10,10)
 Loss = 1.0 - np.eye(10) # hamming loss
 
-print len(ThetaF)
-print len(ThetaP)
+print len(files)
 
-num_iter = 50
+num_iter = 20
 
+hammingLossValues = np.zeros(num_iter*len(files))
+hingeLossValues = np.zeros(num_iter*len(files))
+index = 0
 
 # step size, etc.
 for iter in range(num_iter):
     #for s in np.random.permutation(len(files)):
     print 'iter:' + str(iter)
-    for s in range(5):
+    for s in range(len(files)):
         #print 'iter:' + str(iter) + ' s:' + str(s)
         # Load data ys,xs
         fh = open(datapath + files[s], 'r')
@@ -94,7 +96,7 @@ for iter in range(num_iter):
         for ii in range(ns):
             if(abs(yhatVals[ii]-ys[ii])>=1):
                 hammingLoss += 1
-        print float(hammingLoss)/float(ns)
+        #print float(hammingLoss)/float(ns)
 
         lambdaVal = 0.01
 
@@ -125,7 +127,7 @@ for iter in range(num_iter):
             #hingeLoss += lambdaVal*(ThetaFnorms[ff]*ThetaFnorms[ff])
 
         #hingeLoss += lambdaVal*(ThetaPnorm*ThetaPnorm)
-        print np.divide(np.double(hingeLoss),np.double(ns))
+        #print np.divide(np.double(hingeLoss),np.double(ns))
 
         stepSize = 0.01
         # use yhat_aug & ys to update your parameters theta in the negative gradient direction
@@ -147,3 +149,22 @@ for iter in range(num_iter):
             ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
             #ThetaF[ff] = ThetaF[ff] - 2*lambdaVal*ThetaFnorms[ff]
             ThetaF[ff] = ThetaF[ff] - stepSize*lambdaVal * ThetaF[ff]
+
+        hingeLossValues[index] = np.divide(np.double(hammingLoss),np.double(ns))
+        hammingLossValues[index] = np.divide(np.double(hingeLoss), np.double(ns))
+        if s%10 == 0:
+            print 's:' + str(s)
+            print hingeLossValues[index]
+            print hammingLossValues[index]
+        index += 1
+
+plt.plot(hingeLossValues)
+plt.xlabel('Number of Points Processed')
+plt.ylabel('Hinge Loss')
+plt.show()
+
+
+plt.plot(hammingLossValues)
+plt.xlabel('Number of Points Processed')
+plt.ylabel('Hamming Loss')
+plt.show()
