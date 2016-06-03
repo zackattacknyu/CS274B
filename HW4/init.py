@@ -26,17 +26,22 @@ Loss = 1.0 - np.eye(10) # hamming loss
 
 print len(files)
 
-num_iter = 20
+num_iter = 10
+num_points_per_iter = len(files)
+#num_points_per_iter = 200
+stepSize = 0.02
+lambdaVal = 0.01
 
-hammingLossValues = np.zeros(num_iter*len(files))
-hingeLossValues = np.zeros(num_iter*len(files))
+totalPts = num_iter*num_points_per_iter
+hammingLossValues = np.zeros(totalPts)
+hingeLossValues = np.zeros(totalPts)
 index = 0
 
 # step size, etc.
 for iter in range(num_iter):
     #for s in np.random.permutation(len(files)):
     print 'iter:' + str(iter)
-    for s in range(len(files)):
+    for s in range(num_points_per_iter):
         #print 'iter:' + str(iter) + ' s:' + str(s)
         # Load data ys,xs
         fh = open(datapath + files[s], 'r')
@@ -98,7 +103,7 @@ for iter in range(num_iter):
                 hammingLoss += 1
         #print float(hammingLoss)/float(ns)
 
-        lambdaVal = 0.01
+
 
         #calculate hinge loss factors
         hingeLoss = 0
@@ -129,13 +134,13 @@ for iter in range(num_iter):
         #hingeLoss += lambdaVal*(ThetaPnorm*ThetaPnorm)
         #print np.divide(np.double(hingeLoss),np.double(ns))
 
-        stepSize = 0.01
+
         # use yhat_aug & ys to update your parameters theta in the negative gradient direction
         ThetaPgrad = np.zeros((10, 10))
         for ii in range(ns-1):
-            ThetaPgrad[yhatAugVals[ii], yhatAugVals[ii + 1]] += 1
-            ThetaPgrad[ys[ii],ys[ii+1]] -= 1
-        ThetaP = ThetaP - ThetaPgrad * stepSize
+            ThetaP[yhatAugVals[ii], yhatAugVals[ii + 1]] -= stepSize
+            ThetaP[ys[ii],ys[ii+1]] += stepSize
+        #ThetaP = ThetaP - ThetaPgrad * stepSize
         #ThetaP = ThetaP - 2*lambdaVal*ThetaPnorm
         ThetaP = ThetaP - stepSize*lambdaVal * ThetaP
         #print ThetaP
@@ -143,10 +148,10 @@ for iter in range(num_iter):
         ThetaFgrad = [np.zeros((10, feature_sizes[f])) for f in range(numFeats)]
         for ii in range(ns):
             for ff in range(numFeats):
-                ThetaFgrad[ff][yhatAugVals[ii],xs[ii][ff]] += 1
-                ThetaFgrad[ff][ys[ii], xs[ii][ff]] -= 1
+                ThetaF[ff][yhatAugVals[ii],xs[ii][ff]] -= stepSize
+                ThetaF[ff][ys[ii], xs[ii][ff]] += stepSize
         for ff in range(numFeats):
-            ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
+            #ThetaF[ff] = ThetaF[ff] - ThetaFgrad[ff]*stepSize
             #ThetaF[ff] = ThetaF[ff] - 2*lambdaVal*ThetaFnorms[ff]
             ThetaF[ff] = ThetaF[ff] - stepSize*lambdaVal * ThetaF[ff]
 
@@ -161,6 +166,18 @@ for iter in range(num_iter):
 
 plt.hold(True)
 plt.plot(hingeLossValues,label='Per Symbol Hinge Loss')
+plt.plot(hammingLossValues,label='Per Symbol Hamming Loss')
+plt.xlabel('Number of Points Processed')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+plt.plot(hingeLossValues,label='Per Symbol Hinge Loss')
+plt.xlabel('Number of Points Processed')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
 plt.plot(hammingLossValues,label='Per Symbol Hamming Loss')
 plt.xlabel('Number of Points Processed')
 plt.ylabel('Loss')
