@@ -184,8 +184,6 @@ for iter in range(num_iter):
         hingeLossValues[index] = perSymHingeLoss
         hammingLossValues[index] = perSymHammingLoss
         index += 1
-    hingeLossAfterIter[iter] = perSymHingeLoss
-    hammingLossAfterIter[iter] = perSymHammingLoss
 
 \end{lstlisting}
 
@@ -193,24 +191,42 @@ for iter in range(num_iter):
 
 \section*{Results}
 
-After doing 10 passes through a random 100 points in each pass, these were the results: 
+For the first attempt, I did 10 passes through a random 100 points in each pass. The Hamming Loss seemed to decrease stochastically yet the Hinge Loss exhibited significant variance. I then tried 2 passes through all 6000 points and the Hinge Loss still exhibited the variance. The Hamming Loss seemed to stochatically decrease in the first 2000 points.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=5in]{hingeHammingLoss1.png}
-\caption{Hinge and Hamming Loss}
+\caption{Hinge and Hamming Loss for 10 passes with 100 points each pass}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=5in]{hingeLoss1.png}
-\caption{Hinge Loss}
+\caption{Hinge Loss for 10 passes with 100 points each pass}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=5in]{hammingLoss1.png}
-\caption{Hamming Loss}
+\caption{Hamming Loss for 10 passes with 100 points each pass}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=5in]{hingeHammingLoss2.png}
+\caption{Hinge and Hamming Loss for 2 passes with all points each pass}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=5in]{hingeLoss2.png}
+\caption{Hinge Loss for 2 passes with all points each pass}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=5in]{hammingLoss2.png}
+\caption{Hamming Loss for 2 passes with all points each pass}
 \end{figure}
 
 

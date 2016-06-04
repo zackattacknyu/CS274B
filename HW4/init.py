@@ -27,8 +27,8 @@ Loss = 1.0 - np.eye(10) # hamming loss
 print len(files)
 
 num_iter = 2
-num_points_per_iter = len(files)
-#num_points_per_iter = 100
+#num_points_per_iter = len(files)
+num_points_per_iter = 100
 stepSize = 0.01
 lambdaVal = 0.01
 
@@ -111,7 +111,7 @@ for iter in range(num_iter):
                 hammingLoss += 1
             else:
                 accuracy +=1
-        print np.divide(np.double(accuracy),np.double(ns))
+        #print np.divide(np.double(accuracy),np.double(ns))
         #print float(hammingLoss)/float(ns)
 
 
@@ -170,6 +170,8 @@ for iter in range(num_iter):
         perSymHammingLoss = np.divide(np.double(hammingLoss), np.double(ns))
         hingeLossValues[index] = perSymHingeLoss
         hammingLossValues[index] = perSymHammingLoss
+        if index%20==0:
+            print 'index:' + str(index)
         #if s%10 == 0:
             #print 's:' + str(s)
             #print hingeLossValues[index]
